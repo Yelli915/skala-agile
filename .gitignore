@@ -1,0 +1,19 @@
+# Large prebuilt infra images (exceeds GitHub's 100MB file limit)
+infra-images.tar
+
+# Node
+node_modules/
+vue-frontend/vue-frontend.zip
+
+# Gradle / Java build output
+.gradle/
+bin/
+build/
+*.class
+
+# Env files (local secrets/config)
+.env
+.env.*
+
+# OS / editor
+.DS_Store
