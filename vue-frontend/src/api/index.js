@@ -17,7 +17,7 @@ api.interceptors.request.use((config) => {
 
 // 401 처리를 건너뛰는 경로: 콜백은 스스로 에러를 처리하고,
 // 공개/로그인 페이지에서는 리다이렉트가 무의미하거나 루프를 만든다.
-const NO_REDIRECT_PATHS = ['/callback', '/login', '/admin', '/']
+const NO_REDIRECT_PATHS = ['/callback', '/login', '/']
 
 api.interceptors.response.use(
   (res) => res,

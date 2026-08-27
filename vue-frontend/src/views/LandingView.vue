@@ -90,7 +90,6 @@
           <span>물류이음</span>
         </div>
         <p class="footer-tagline">지역이 함께 나르는 공동물류 플랫폼</p>
-        <router-link to="/admin" class="footer-admin-link">관리자 로그인 →</router-link>
       </div>
       <p class="footer-copy">© 2026 물류이음. All rights reserved.</p>
     </footer>
@@ -331,13 +330,6 @@ const regions = [
 }
 .footer-logo img { width: 28px; height: 28px; border-radius: 6px; object-fit: contain; }
 .footer-tagline { font-size: 12.5px; color: rgba(255,255,255,0.55); }
-.footer-admin-link {
-  margin-left: auto;
-  font-size: 12.5px;
-  color: rgba(255,255,255,0.55);
-  transition: var(--transition);
-}
-.footer-admin-link:hover { color: #fff; }
 .footer-copy {
   max-width: 1200px;
   margin: 24px auto 0;
