@@ -2,33 +2,30 @@ import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { courseApi } from '@/api/course.js'
 
-import springImg from '../assets/images/courses/spring_boot.png'
-import vueImg from '../assets/images/courses/vue_js.png'
-import dockerImg from '../assets/images/courses/docker.png'
-import k8sImg from '../assets/images/courses/kubernetes.png'
-import pythonImg from '../assets/images/courses/python.png'
-import genaiImg from '../assets/images/courses/generative_ai.png'
-
 /**
- * 백엔드 course-service의 Course.Category enum(불변) → 공동물류 플랫폼 표시용 상품군 라벨.
+ * 백엔드 course-service의 Course.Category enum(불변) → 공동물류 플랫폼 표시용 "배송유형" 라벨.
  *
  * 백엔드는 여전히 강의 마켓플레이스로 동작한다(BACKEND/FRONTEND/... 값을 그대로 주고받음).
- * 여기서는 화면에 보이는 문구/색상/썸네일만 물류 도메인으로 덮어씌운다. (display-only relabel)
+ * 여기서는 화면에 보이는 문구/색상/아이콘만 물류 도메인으로 덮어씌운다. (display-only relabel)
  * enum 값 8종(BACKEND, FRONTEND, DEVOPS, DATA_SCIENCE, MOBILE, SECURITY, DATABASE, OTHER)을
- * 모두 커버해야 새로 등록된 프로그램도 라벨/썸네일이 깨지지 않는다.
+ * 모두 커버해야 새로 등록된 프로그램도 라벨/아이콘이 깨지지 않는다.
+ *
+ * 분류 축은 "배송유형" — 상품군이 아니라 공동배송을 묶는 방식으로 나눈다.
+ * - emoji: 별도 이미지 자산 없이 컬러 배경 위에 얹는 카드 썸네일
+ * - blurb: 목록/상세에서 배송유형을 한 줄로 설명
  */
 const CATEGORY_META = {
-  BACKEND:      { label: '신선식품',   badge: 'badge-teal',   bg: 'thumb-teal',   thumb: springImg },
-  FRONTEND:     { label: '생활잡화',   badge: 'badge-teal',   bg: 'thumb-teal',   thumb: vueImg },
-  DEVOPS:       { label: '의류·잡화',  badge: 'badge-blue',   bg: 'thumb-blue',   thumb: dockerImg },
-  DATA_SCIENCE: { label: '가공식품',   badge: 'badge-purple', bg: 'thumb-purple', thumb: pythonImg },
-  MOBILE:       { label: '뷰티·헬스',  badge: 'badge-pink',   bg: 'thumb-pink',   thumb: genaiImg },
-  SECURITY:     { label: '가전·전자',  badge: 'badge-blue',   bg: 'thumb-blue',   thumb: k8sImg },
-  DATABASE:     { label: '도서·문구',  badge: 'badge-teal',   bg: 'thumb-teal',   thumb: vueImg },
-  OTHER:        { label: '기타',       badge: 'badge-gray',   bg: 'thumb-gray',   thumb: genaiImg },
+  BACKEND:      { label: '당일 공동배송',      badge: 'badge-teal',   bg: 'thumb-teal',   emoji: '🚚', blurb: '오전 마감 물량을 모아 당일 중 공동 배송' },
+  FRONTEND:     { label: '정기 묶음배송',      badge: 'badge-blue',   bg: 'thumb-blue',   emoji: '📦', blurb: '주 단위로 예약된 물량을 묶어 정기 배송' },
+  DEVOPS:       { label: '냉장·신선 공동배송', badge: 'badge-cyan',   bg: 'thumb-cyan',   emoji: '❄️', blurb: '콜드체인 차량으로 신선식품을 함께 배송' },
+  DATA_SCIENCE: { label: '새벽 배송',          badge: 'badge-purple', bg: 'thumb-purple', emoji: '🌙', blurb: '심야 집하 후 익일 새벽 시간대에 배송' },
+  MOBILE:       { label: '권역 라스트마일',    badge: 'badge-amber',  bg: 'thumb-amber',  emoji: '📍', blurb: '권역 거점에서 소비자 문 앞까지 최종 배송' },
+  SECURITY:     { label: '반품·회수 물류',     badge: 'badge-pink',   bg: 'thumb-pink',   emoji: '🔄', blurb: '반품·교환 물량을 권역별로 모아 회수' },
+  DATABASE:     { label: '대형화물 공동배차',  badge: 'badge-slate',  bg: 'thumb-slate',  emoji: '🚛', blurb: '가전·가구 등 대형 화물을 공동 배차로 운송' },
+  OTHER:        { label: '기타',               badge: 'badge-gray',   bg: 'thumb-gray',   emoji: '📋', blurb: '위 유형에 속하지 않는 공동물류 프로그램' },
 }
 
-const FALLBACK_META = { label: '기타', badge: 'badge-gray', bg: 'thumb-gray', thumb: null }
+const FALLBACK_META = { label: '기타', badge: 'badge-gray', bg: 'thumb-gray', emoji: '📋', blurb: '공동물류 프로그램' }
 
 // 표시용 라벨 → enum 역매핑 (이미 정규화된 값이 다시 들어와도 해석 가능하도록)
 const LABEL_TO_KEY = Object.fromEntries(
@@ -76,7 +73,7 @@ export const useCourseStore = defineStore('course', () => {
     }
   }
 
-  // 컴포넌트에서 배지 색상 / 썸네일 배경 / 썸네일 이미지를 한 번에 얻는다.
+  // 컴포넌트에서 배지 색상 / 썸네일 배경 / 이모지 / 설명 문구를 한 번에 얻는다.
   function categoryMeta(value) {
     return resolveCategoryMeta(value)
   }

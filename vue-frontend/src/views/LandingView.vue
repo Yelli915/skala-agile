@@ -6,12 +6,12 @@
     <section class="hero">
       <div class="hero-inner">
         <div class="hero-content fade-in-up">
-          <span class="hero-badge">MSA 기반 지역 공동물류 플랫폼</span>
+          <span class="hero-badge">MSA 기반 지역 공동물류 플랫폼 · 실습용 데모</span>
           <h1 class="hero-title">지역이 함께 나르면,<br>배송비는 내려갑니다</h1>
           <p class="hero-desc">지자체가 여는 공동물류 프로그램에 참여하고, 소상공인 배송비 부담을 함께 줄여보세요.</p>
           <div class="hero-actions">
-            <router-link to="/login" class="btn btn-primary btn-lg">무료로 시작하기</router-link>
-            <router-link to="/courses" class="btn btn-outline btn-lg">프로그램 둘러보기</router-link>
+            <router-link to="/login" class="btn btn-primary btn-lg">소상공인 참여 신청</router-link>
+            <router-link to="/login" class="btn btn-outline btn-lg">지자체 담당자 로그인</router-link>
           </div>
           <div class="hero-stats">
             <div class="stat"><span class="stat-num">1,200+</span><span class="stat-label">공동물류 프로그램</span></div>
@@ -25,23 +25,23 @@
       </div>
     </section>
 
-    <!-- 인기 강의 -->
+    <!-- 인기 프로그램 -->
     <section class="popular-section">
       <div class="section-inner">
         <div class="section-header">
-          <h2 class="section-title">인기 프로그램</h2>
+          <h2 class="section-title">인기 공동물류 프로그램</h2>
           <router-link to="/login" class="section-link">전체 보기 →</router-link>
         </div>
         <div class="course-grid">
           <div v-for="course in featuredCourses" :key="course.id" class="course-card-landing">
-            <div class="card-thumb" :class="course.thumbBg">
-              <img :src="course.thumbSrc" :alt="course.title" class="thumb-img" />
+            <div class="card-thumb" :class="course.bg">
+              <span class="thumb-emoji" aria-hidden="true">{{ course.emoji }}</span>
             </div>
             <div class="card-body">
               <span class="badge" :class="course.badgeClass">{{ course.category }}</span>
               <h3 class="card-title">{{ course.title }}</h3>
               <div class="card-meta">
-                <span class="instructor">{{ course.instructor }}</span>
+                <span class="operator">{{ course.operator }}</span>
                 <span class="price">{{ course.price }}</span>
               </div>
             </div>
@@ -64,24 +64,43 @@
       </div>
     </section>
 
+    <!-- 참여 지자체 -->
+    <section class="regions-section">
+      <div class="section-inner">
+        <h2 class="section-title center">전국 340여 개 지자체가 함께합니다</h2>
+        <div class="region-strip">
+          <span v-for="r in regions" :key="r" class="region-chip">{{ r }}</span>
+        </div>
+      </div>
+    </section>
+
     <!-- CTA -->
     <section class="cta-section">
       <div class="cta-inner">
         <h2>지금 바로 참여하세요</h2>
         <p>전국 340여 개 지자체와 28,000여 소상공인이 물류이음으로 배송비를 함께 줄이고 있습니다.</p>
-        <router-link to="/login" class="btn btn-primary btn-lg">무료로 시작하기</router-link>
+        <router-link to="/login" class="btn btn-primary btn-lg">소상공인 참여 신청</router-link>
       </div>
     </section>
 
     <!-- 푸터 -->
     <footer class="footer">
       <div class="footer-inner">
-        <div class="footer-logo">
-          <img src="@/assets/images/logo/main_logo.png" alt="물류이음" />
-          <span>물류이음</span>
+        <div class="footer-col">
+          <div class="footer-logo">
+            <img src="@/assets/images/logo/main_logo.png" alt="물류이음" />
+            <span>물류이음</span>
+          </div>
+          <p class="footer-note">
+            본 서비스는 고려대학교 MSA 강의를 위한 교육용 데모입니다. 실제 물류·정산은 이루어지지 않습니다.
+          </p>
         </div>
-        <p class="footer-copy">© 2026 물류이음. All rights reserved.</p>
+        <div class="footer-col footer-contact">
+          <p>운영 문의: audit@korea.ac.kr</p>
+          <p>지도교수: Sungryel Lim Ph.D</p>
+        </div>
       </div>
+      <p class="footer-copy">© 2026 물류이음 (교육용 데모). All rights reserved.</p>
     </footer>
   </div>
 </template>
@@ -89,28 +108,28 @@
 <script setup>
 import AppHeader from '@/components/AppHeader.vue'
 
-import springImg   from '@/assets/images/courses/spring_boot.png'
-import vueImg      from '@/assets/images/courses/vue_js.png'
-import k8sImg      from '@/assets/images/courses/kubernetes.png'
-import dockerImg   from '@/assets/images/courses/docker.png'
-import pythonImg   from '@/assets/images/courses/python.png'
-import genaiImg    from '@/assets/images/courses/generative_ai.png'
-
 // 랜딩 노출용 예시 데이터(로그인 전 화면). 실제 목록은 로그인 후 /courses에서 course-service로부터 불러온다.
+// 배송유형 라벨/이모지/배지는 store/course.js의 CATEGORY_META와 동일한 값으로 맞춘다.
 const featuredCourses = [
-  { id:1, title:'신선식품 새벽 공동배송', category:'신선식품', instructor:'서울 성동구', price:'분담금 ₩12,000', thumbSrc: springImg, thumbBg:'thumb-teal',   badgeClass:'badge-teal'   },
-  { id:2, title:'생활잡화 묶음배송 프로그램', category:'생활잡화', instructor:'경기 수원시', price:'분담금 ₩9,000',  thumbSrc: vueImg,    thumbBg:'thumb-teal',   badgeClass:'badge-teal'   },
-  { id:3, title:'의류·잡화 지역 물류거점 공유', category:'의류·잡화', instructor:'대구 중구', price:'분담금 ₩15,000', thumbSrc: dockerImg, thumbBg:'thumb-blue',   badgeClass:'badge-blue'   },
-  { id:4, title:'가공식품 냉장 공동물류', category:'가공식품', instructor:'부산 해운대구', price:'분담금 ₩18,000', thumbSrc: pythonImg, thumbBg:'thumb-purple', badgeClass:'badge-purple' },
-  { id:5, title:'뷰티·헬스 소형화물 합배송', category:'뷰티·헬스', instructor:'인천 미추홀구', price:'분담금 ₩8,000',  thumbSrc: genaiImg,  thumbBg:'thumb-pink',   badgeClass:'badge-pink'   },
-  { id:6, title:'가전·전자 권역별 공동 라스트마일', category:'가전·전자', instructor:'광주 서구', price:'분담금 ₩21,000', thumbSrc: k8sImg,    thumbBg:'thumb-blue',   badgeClass:'badge-blue'   },
+  { id: 1, title: '성동구 신선식품 새벽 공동배송', category: '새벽 배송',          operator: '서울 성동구',   price: '분담금 ₩12,000', emoji: '🌙', bg: 'thumb-purple', badgeClass: 'badge-purple' },
+  { id: 2, title: '수원 전통시장 정기 묶음배송',   category: '정기 묶음배송',      operator: '경기 수원시',   price: '분담금 ₩9,000',  emoji: '📦', bg: 'thumb-blue',   badgeClass: 'badge-blue' },
+  { id: 3, title: '대구 중구 당일 공동배송',       category: '당일 공동배송',      operator: '대구 중구',     price: '분담금 ₩15,000', emoji: '🚚', bg: 'thumb-teal',   badgeClass: 'badge-teal' },
+  { id: 4, title: '해운대 수산물 냉장 공동물류',   category: '냉장·신선 공동배송', operator: '부산 해운대구', price: '분담금 ₩18,000', emoji: '❄️', bg: 'thumb-cyan',   badgeClass: 'badge-cyan' },
+  { id: 5, title: '미추홀 소형화물 권역 라스트마일', category: '권역 라스트마일',  operator: '인천 미추홀구', price: '분담금 ₩8,000',  emoji: '📍', bg: 'thumb-amber',  badgeClass: 'badge-amber' },
+  { id: 6, title: '광주 서구 대형가전 공동배차',   category: '대형화물 공동배차',  operator: '광주 서구',     price: '분담금 ₩21,000', emoji: '🚛', bg: 'thumb-slate',  badgeClass: 'badge-slate' },
 ]
 
 const features = [
-  { icon:'🚚', title:'배송비 분담', desc:'지역 소상공인이 물량을 모아 공동배송하면 건당 배송비 부담이 크게 줄어듭니다.' },
-  { icon:'🏛️', title:'지자체 지원금 반영', desc:'프로그램별 지자체 지원금이 정산에 자동 반영되어 실부담금만 냅니다.' },
-  { icon:'🎯', title:'맞춤 프로그램 추천', desc:'참여 이력을 분석해 우리 가게에 맞는 공동물류 프로그램을 추천합니다.' },
-  { icon:'📦', title:'신청 즉시 접수', desc:'원클릭 신청 후 정산이 완료되면 참여가 확정되고 물류 배차가 시작됩니다.' },
+  { icon: '🚚', title: '배송비 분담', desc: '지역 소상공인이 물량을 모아 공동배송하면 건당 배송비 부담이 크게 줄어듭니다.' },
+  { icon: '🏛️', title: '지자체 지원금 반영', desc: '프로그램별 지자체 지원금이 정산에 자동 반영되어 실부담금만 냅니다.' },
+  { icon: '🎯', title: '맞춤 프로그램 추천', desc: '참여 이력을 분석해 우리 가게에 맞는 공동물류 프로그램을 추천합니다.' },
+  { icon: '📦', title: '신청 즉시 접수', desc: '원클릭 신청 후 정산이 완료되면 참여가 확정되고 물류 배차가 시작됩니다.' },
+]
+
+const regions = [
+  '서울 성동구', '경기 수원시', '대구 중구', '부산 해운대구', '인천 미추홀구',
+  '광주 서구', '대전 유성구', '울산 남구', '강원 춘천시', '충북 청주시',
+  '전북 전주시', '경남 창원시', '제주 서귀포시',
 ]
 </script>
 
@@ -161,6 +180,7 @@ const features = [
   display: flex;
   gap: 12px;
   margin-bottom: 40px;
+  flex-wrap: wrap;
 }
 .btn-lg { padding: 12px 28px; font-size: 15px; }
 .hero-stats {
@@ -183,7 +203,7 @@ const features = [
   box-shadow: var(--shadow-lg);
 }
 
-/* 강의 섹션 */
+/* 프로그램 섹션 */
 .popular-section { padding: 64px 0; }
 .section-inner { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
 .section-header {
@@ -224,11 +244,18 @@ const features = [
 .thumb-blue   { background: #E6F1FB; }
 .thumb-purple { background: #EEEDFE; }
 .thumb-pink   { background: #FBEAF0; }
-.thumb-img { width: 100%; height: 100%; object-fit: contain; padding: 14px; }
+.thumb-amber  { background: #FAEEDA; }
+.thumb-cyan   { background: var(--color-cold-light); }
+.thumb-slate  { background: #EAEEF3; }
+.thumb-emoji {
+  font-size: 40px;
+  line-height: 1;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.08));
+}
 .card-body { padding: 14px 16px; display: flex; flex-direction: column; gap: 6px; }
 .card-title { font-size: 14px; font-weight: 600; color: var(--color-text-primary); line-height: 1.4; }
 .card-meta { display: flex; justify-content: space-between; align-items: center; }
-.instructor { font-size: 12px; color: var(--color-text-secondary); }
+.operator { font-size: 12px; color: var(--color-text-secondary); }
 .price { font-size: 14px; font-weight: 600; color: var(--color-primary); }
 
 /* 특징 */
@@ -251,6 +278,26 @@ const features = [
 .feature-title { font-size: 15px; font-weight: 600; margin-bottom: 8px; }
 .feature-desc { font-size: 13px; color: var(--color-text-secondary); line-height: 1.6; }
 
+/* 참여 지자체 */
+.regions-section { padding: 56px 0; background: var(--color-bg-secondary); }
+.region-strip {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  max-width: 760px;
+  margin: 0 auto;
+}
+.region-chip {
+  padding: 8px 16px;
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+}
+
 /* CTA */
 .cta-section {
   padding: 80px 0;
@@ -271,16 +318,19 @@ const features = [
 /* 푸터 */
 .footer {
   background: var(--color-text-primary);
-  padding: 32px 0;
+  padding: 36px 0 24px;
 }
 .footer-inner {
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 24px;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
+  gap: 32px;
+  flex-wrap: wrap;
 }
+.footer-col { display: flex; flex-direction: column; gap: 10px; max-width: 460px; }
 .footer-logo {
   display: flex;
   align-items: center;
@@ -290,5 +340,25 @@ const features = [
   font-weight: 600;
 }
 .footer-logo img { width: 28px; height: 28px; border-radius: 6px; }
-.footer-copy { font-size: 13px; color: rgba(255,255,255,0.5); }
+.footer-note { font-size: 12.5px; color: rgba(255,255,255,0.55); line-height: 1.6; }
+.footer-contact p { font-size: 12.5px; color: rgba(255,255,255,0.6); }
+.footer-copy {
+  max-width: 1200px;
+  margin: 24px auto 0;
+  padding: 16px 24px 0;
+  border-top: 1px solid rgba(255,255,255,0.1);
+  font-size: 12px;
+  color: rgba(255,255,255,0.4);
+}
+
+@media (max-width: 900px) {
+  .hero-inner { grid-template-columns: 1fr; }
+  .course-grid { grid-template-columns: repeat(2, 1fr); }
+  .features-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 560px) {
+  .course-grid { grid-template-columns: 1fr; }
+  .features-grid { grid-template-columns: 1fr; }
+  .hero-stats { gap: 20px; }
+}
 </style>

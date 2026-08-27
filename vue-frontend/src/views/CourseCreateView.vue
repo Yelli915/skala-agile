@@ -3,49 +3,14 @@
     <AppHeader />
 
     <div class="page-layout">
-      <!-- 사이드바 -->
-      <aside class="sidebar">
-        <div class="sidebar-section">
-          <div class="sidebar-label">메뉴</div>
-
-          <router-link
-            to="/courses"
-            class="sidebar-item"
-            :class="{ active: $route.path === '/courses' }"
-          >
-            <span class="si-icon">📚</span> 프로그램 목록
-          </router-link>
-
-          <router-link
-            to="/courses/new"
-            class="sidebar-item"
-            :class="{ active: $route.path === '/courses/new' }"
-          >
-            <span class="si-icon">✍️</span> 프로그램 등록
-          </router-link>
-
-          <router-link to="/mypage" class="sidebar-item">
-            <span class="si-icon">⭐</span> 마이페이지
-          </router-link>
-        </div>
-
-        <div class="sidebar-section">
-          <div class="sidebar-label">계정</div>
-          <router-link to="/mypage" class="sidebar-item">
-            <span class="si-icon">👤</span> 마이페이지
-          </router-link>
-          <button class="sidebar-item sidebar-btn" @click="handleLogout">
-            <span class="si-icon">🚪</span> 로그아웃
-          </button>
-        </div>
-      </aside>
+      <AppSidebar />
 
       <!-- 메인 -->
       <main class="main-content">
         <div class="content-header">
           <div>
-            <h1 class="page-title">프로그램 등록</h1>
-            <p class="page-subtitle">지자체 담당자 계정으로 새로운 프로그램을 등록합니다.</p>
+            <h1 class="page-title">공동물류 프로그램 등록</h1>
+            <p class="page-subtitle">지자체 담당자 계정으로 새로운 공동물류 프로그램을 개설합니다.</p>
           </div>
         </div>
 
@@ -64,21 +29,24 @@
             </div>
 
             <div class="form-group">
-              <label class="form-label" for="description">프로그램 설명</label>
+              <label class="form-label" for="description">지원 대상 · 배송 권역 · 지원 내용</label>
               <textarea
                 id="description"
                 v-model.trim="form.description"
                 class="form-textarea"
-                rows="6"
-                placeholder="프로그램 개요, 지원 대상 소상공인, 배송 권역, 지자체 지원 내용 등을 입력해 주세요."
+                rows="7"
+                placeholder="- 지원 대상: 관내 등록 소상공인 (예: 전통시장 상인회 소속)&#10;- 배송 권역: 성동구 전역 + 인접 3개 동&#10;- 지자체 지원 내용: 건당 배송비의 30% 지원, 냉장 포장재 무상 제공&#10;- 모집 마감: 2026-09-30"
               ></textarea>
+              <p class="form-hint">
+                여기에 적은 내용은 프로그램 상세 화면 상단의 <strong>지원 대상 · 배송비 기준</strong> 영역에 그대로 노출됩니다.
+              </p>
             </div>
 
             <div class="form-row">
               <div class="form-group">
-                <label class="form-label" for="category">상품군</label>
+                <label class="form-label" for="category">배송유형</label>
                 <select id="category" v-model="form.category" class="form-select">
-                  <option disabled value="">상품군을 선택하세요</option>
+                  <option disabled value="">배송유형을 선택하세요</option>
                   <option
                     v-for="option in categoryOptions"
                     :key="option.value"
@@ -87,10 +55,11 @@
                     {{ option.label }}
                   </option>
                 </select>
+                <p v-if="selectedCategoryBlurb" class="form-hint">{{ selectedCategoryBlurb }}</p>
               </div>
 
               <div class="form-group">
-                <label class="form-label" for="price">참여 분담금 기준액</label>
+                <label class="form-label" for="price">참여 분담금 기준액 (원)</label>
                 <input
                   id="price"
                   v-model.number="form.price"
@@ -100,6 +69,7 @@
                   class="form-input"
                   placeholder="예: 12000"
                 />
+                <p class="form-hint">지자체 지원금 적용 전 배송비 기준액입니다. 소상공인 실부담금은 정산 시 확정됩니다.</p>
               </div>
             </div>
 
@@ -133,9 +103,10 @@
 </template>
 
 <script setup>
-import { reactive, ref } from 'vue'
+import { computed, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import AppHeader from '@/components/AppHeader.vue'
+import AppSidebar from '@/components/AppSidebar.vue'
 import { courseApi } from '@/api/course.js'
 import { useAuthStore } from '@/store/auth.js'
 import { useCourseStore } from '@/store/course.js'
@@ -156,13 +127,12 @@ const validationError = ref('')
 const submitError = ref('')
 const submitSuccess = ref('')
 
-// 백엔드 Course.Category enum 8종과 1:1로 매핑된 표시용 상품군 (store가 단일 소스)
+// 백엔드 Course.Category enum 8종과 1:1로 매핑된 표시용 배송유형 (store가 단일 소스)
 const categoryOptions = courseStore.categoryOptions
 
-function handleLogout() {
-  auth.logout()
-  router.push('/')
-}
+const selectedCategoryBlurb = computed(() =>
+  form.category ? courseStore.categoryMeta(form.category).blurb : ''
+)
 
 function validateForm() {
   validationError.value = ''
@@ -178,12 +148,12 @@ function validateForm() {
   }
 
   if (!form.description) {
-    validationError.value = '프로그램 설명을 입력해 주세요.'
+    validationError.value = '지원 대상·배송 권역·지원 내용을 입력해 주세요.'
     return false
   }
 
   if (!form.category) {
-    validationError.value = '상품군을 선택해 주세요.'
+    validationError.value = '배송유형을 선택해 주세요.'
     return false
   }
 
@@ -261,67 +231,6 @@ async function handleSubmit() {
   gap: 28px;
 }
 
-/* 사이드바 */
-.sidebar {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.sidebar-section {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  margin-bottom: 8px;
-}
-
-.sidebar-label {
-  font-size: 10px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--color-text-muted);
-  padding: 8px 12px 4px;
-}
-
-.sidebar-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 9px 12px;
-  border-radius: var(--radius-md);
-  font-size: 14px;
-  color: var(--color-text-secondary);
-  transition: var(--transition);
-  background: none;
-  border: none;
-  width: 100%;
-  text-align: left;
-  cursor: pointer;
-  font-family: var(--font-sans);
-  text-decoration: none;
-}
-
-.sidebar-item:hover {
-  background: var(--color-bg-tertiary);
-  color: var(--color-text-primary);
-}
-
-.sidebar-item.active {
-  background: var(--color-primary-light);
-  color: var(--color-primary);
-  font-weight: 500;
-}
-
-.si-icon {
-  font-size: 15px;
-}
-
-.sidebar-btn {
-  color: var(--color-text-secondary);
-}
-
-/* 메인 */
 .main-content {
   min-width: 0;
 }
@@ -374,6 +283,12 @@ async function handleSubmit() {
   color: var(--color-text-primary);
 }
 
+.form-hint {
+  font-size: 12px;
+  color: var(--color-text-muted);
+  line-height: 1.5;
+}
+
 .form-input,
 .form-textarea,
 .form-select {
@@ -394,13 +309,13 @@ async function handleSubmit() {
 .form-textarea:focus,
 .form-select:focus {
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.08);
+  box-shadow: 0 0 0 3px var(--color-primary-light);
 }
 
 .form-textarea {
   resize: vertical;
-  min-height: 140px;
-  line-height: 1.5;
+  min-height: 150px;
+  line-height: 1.6;
 }
 
 .error-box {
@@ -412,8 +327,8 @@ async function handleSubmit() {
 }
 
 .success-box {
-  background: #ecfdf3;
-  color: #15803d;
+  background: var(--color-support-light);
+  color: var(--color-support);
   border-radius: var(--radius-md);
   padding: 12px 14px;
   font-size: 13px;

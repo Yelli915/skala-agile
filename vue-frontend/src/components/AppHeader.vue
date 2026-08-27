@@ -4,13 +4,21 @@
       <!-- 로고 -->
       <router-link to="/" class="logo">
         <img src="@/assets/images/logo/main_logo.png" alt="물류이음" class="logo-img" />
-        <span class="logo-text">물류이음</span>
+        <span class="logo-box">
+          <span class="logo-text">물류이음</span>
+          <span class="logo-tagline">지역 공동물류 플랫폼</span>
+        </span>
       </router-link>
 
       <!-- 네비게이션 -->
       <nav class="nav-links" v-if="auth.isAuthenticated">
-        <router-link to="/courses" class="nav-link" :class="{ active: $route.path.startsWith('/courses') }">프로그램</router-link>
-        <router-link to="/enrollments" class="nav-link" :class="{ active: $route.path === '/enrollments' }">내 참여</router-link>
+        <router-link to="/courses" class="nav-link" :class="{ active: $route.path.startsWith('/courses') }">공동물류 프로그램</router-link>
+        <router-link
+          v-if="!isInstructor"
+          to="/enrollments"
+          class="nav-link"
+          :class="{ active: $route.path === '/enrollments' }"
+        >내 참여 현황</router-link>
       </nav>
 
       <!-- 우측 액션 -->
@@ -23,7 +31,7 @@
         </template>
         <template v-else>
           <router-link to="/login" class="btn btn-ghost btn-sm">로그인</router-link>
-          <router-link to="/login" class="btn btn-primary btn-sm">시작하기</router-link>
+          <router-link to="/login" class="btn btn-primary btn-sm">참여 신청</router-link>
         </template>
       </div>
     </div>
@@ -31,15 +39,16 @@
 </template>
 
 <script setup>
+import { computed } from 'vue'
 import { useAuthStore } from '@/store/auth.js'
-import { useRouter } from 'vue-router'
 
 const auth = useAuthStore()
-const router = useRouter()
+
+const isInstructor = computed(() => auth.user?.role === 'INSTRUCTOR')
 
 function handleLogout() {
+  // auth.logout()이 랜딩('/')으로 전체 새로고침 이동까지 처리한다.
   auth.logout()
-  router.push('/')
 }
 </script>
 
@@ -73,11 +82,23 @@ function handleLogout() {
   object-fit: contain;
   border-radius: 8px;
 }
+.logo-box {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+}
 .logo-text {
   font-size: 17px;
   font-weight: 700;
   color: var(--color-text-primary);
   letter-spacing: -0.3px;
+}
+.logo-tagline {
+  font-size: 10.5px;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  letter-spacing: 0.02em;
+  margin-top: 1px;
 }
 .nav-links {
   display: flex;

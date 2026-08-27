@@ -1,21 +1,21 @@
 <template>
   <router-link :to="`/courses/${course.id}`" class="course-card">
-    <!-- 썸네일 -->
+    <!-- 썸네일: 배송유형 컬러 배경 + 이모지 -->
     <div class="card-thumb" :class="meta.bg">
-      <img v-if="meta.thumb" :src="meta.thumb" :alt="course.title" class="thumb-img" />
-      <div v-else class="thumb-placeholder">{{ categoryLabel?.charAt(0) }}</div>
+      <span class="thumb-emoji" aria-hidden="true">{{ meta.emoji }}</span>
     </div>
 
     <!-- 내용 -->
     <div class="card-body">
       <span class="badge" :class="meta.badge">{{ categoryLabel }}</span>
       <h3 class="card-title">{{ course.title }}</h3>
+      <p class="card-blurb">{{ meta.blurb }}</p>
       <div class="card-meta">
         <span class="operator">{{ operatorName }}</span>
-        <span class="price">₩{{ Number(course.price).toLocaleString() }}</span>
+        <span class="price">분담금 ₩{{ Number(course.price || 0).toLocaleString() }}</span>
       </div>
       <div class="card-footer">
-        <span class="enrolled">참여 소상공인 {{ Number(course.enrollmentCount || 0).toLocaleString() }}명</span>
+        <span class="enrolled">현재 {{ Number(course.enrollmentCount || 0).toLocaleString() }}건 참여 신청</span>
       </div>
     </div>
   </router-link>
@@ -69,17 +69,13 @@ const operatorName = computed(
 .thumb-amber  { background: #FAEEDA; }
 .thumb-purple { background: #EEEDFE; }
 .thumb-pink   { background: #FBEAF0; }
+.thumb-cyan   { background: var(--color-cold-light); }
+.thumb-slate  { background: #EAEEF3; }
 .thumb-gray   { background: #F1EFE8; }
-.thumb-img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  padding: 16px;
-}
-.thumb-placeholder {
-  font-size: 36px;
-  font-weight: 700;
-  color: var(--color-text-muted);
+.thumb-emoji {
+  font-size: 44px;
+  line-height: 1;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.08));
 }
 .card-body {
   padding: 14px 16px;
@@ -94,10 +90,16 @@ const operatorName = computed(
   color: var(--color-text-primary);
   line-height: 1.4;
 }
+.card-blurb {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  line-height: 1.4;
+}
 .card-meta {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  margin-top: auto;
 }
 .operator {
   font-size: 12px;

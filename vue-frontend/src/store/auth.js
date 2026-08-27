@@ -46,7 +46,8 @@ export const useAuthStore = defineStore('auth', () => {
     sessionStorage.removeItem('user')
 
     if (redirect) {
-      window.location.href = '/login'
+      // 로그아웃 후에는 최초 진입 화면(랜딩)으로. 전체 새로고침으로 Pinia 상태도 함께 초기화된다.
+      window.location.href = '/'
     }
   }
 

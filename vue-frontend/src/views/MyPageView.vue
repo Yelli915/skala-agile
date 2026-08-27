@@ -2,34 +2,7 @@
   <div class="page-wrapper">
     <AppHeader />
     <div class="page-layout">
-      <aside class="sidebar">
-        <div class="sidebar-section">
-          <div class="sidebar-label">메뉴</div>
-
-          <router-link to="/courses" class="sidebar-item">
-            <span class="si-icon">📚</span> 프로그램 목록
-          </router-link>
-
-          <router-link
-            v-if="!isInstructor"
-            to="/enrollments"
-            class="sidebar-item"
-          >
-            <span class="si-icon">✅</span> 내 참여 목록
-          </router-link>
-
-          <router-link to="/mypage" class="sidebar-item active">
-            <span class="si-icon">⭐</span> 마이페이지
-          </router-link>
-        </div>
-
-        <div class="sidebar-section">
-          <div class="sidebar-label">계정</div>
-          <button class="sidebar-item sidebar-btn" @click="handleLogout">
-            <span class="si-icon">🚪</span> 로그아웃
-          </button>
-        </div>
-      </aside>
+      <AppSidebar />
 
       <main class="main-content">
         <!-- 프로필 카드 -->
@@ -39,7 +12,7 @@
             <h2 class="profile-name">{{ auth.user?.name || '사용자' }}</h2>
             <p class="profile-email">{{ auth.user?.email || '-' }}</p>
             <span class="badge" :class="isInstructor ? 'badge-amber' : 'badge-blue'">
-              {{ isInstructor ? '지자체 담당자' : '소상공인' }}
+              {{ isInstructor ? '🏢 지자체 담당자' : '🏪 소상공인' }}
             </span>
           </div>
         </div>
@@ -88,6 +61,10 @@
               <div class="summary-value">{{ myCourses.length }}</div>
             </div>
             <div class="summary-card">
+              <div class="summary-label">진행 중 프로그램 수</div>
+              <div class="summary-value">{{ activeCourseCount }}</div>
+            </div>
+            <div class="summary-card">
               <div class="summary-label">총 참여 소상공인 수</div>
               <div class="summary-value">{{ totalEnrollmentCount }}</div>
             </div>
@@ -124,8 +101,11 @@
 
               <div class="course-meta-grid">
                 <div class="meta-box">
-                  <div class="meta-label">상품군</div>
-                  <div class="meta-value">{{ courseStore.categoryMeta(course.category).label }}</div>
+                  <div class="meta-label">배송유형</div>
+                  <div class="meta-value">
+                    {{ courseStore.categoryMeta(course.category).emoji }}
+                    {{ courseStore.categoryMeta(course.category).label }}
+                  </div>
                 </div>
                 <div class="meta-box">
                   <div class="meta-label">분담금 기준액</div>
@@ -166,15 +146,14 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
 import AppHeader from '@/components/AppHeader.vue'
+import AppSidebar from '@/components/AppSidebar.vue'
 import CourseCard from '@/components/CourseCard.vue'
 import { useAuthStore } from '@/store/auth.js'
 import { enrollmentApi } from '@/api/enrollment.js'
 import { courseApi } from '@/api/course.js'
 import { useCourseStore } from '@/store/course.js'
 
-const router = useRouter()
 const auth = useAuthStore()
 const courseStore = useCourseStore()
 
@@ -198,10 +177,10 @@ const totalEnrollmentCount = computed(() =>
   }, 0)
 )
 
-function handleLogout() {
-  auth.logout()
-  router.push('/')
-}
+// course-service의 Course.status가 ACTIVE인 프로그램을 "진행 중"으로 집계
+const activeCourseCount = computed(() =>
+  myCourses.value.filter((course) => course.status === 'ACTIVE').length
+)
 
 function formatPrice(price) {
   const value = Number(price ?? 0)
@@ -225,7 +204,7 @@ function getCourseInstructorId(course) {
 
 function buildRecommendMessage(basedOnCategory) {
   if (basedOnCategory) {
-    return `${courseStore.categoryMeta(basedOnCategory).label} 상품군 참여 이력을 기반으로 추천한 공동물류 프로그램입니다.`
+    return `'${courseStore.categoryMeta(basedOnCategory).label}' 참여 이력을 기반으로 추천한 공동물류 프로그램입니다.`
   }
   return '참여 소상공인에게 인기 있는 공동물류 프로그램입니다.'
 }
@@ -354,61 +333,6 @@ onMounted(async () => {
   display: grid;
   grid-template-columns: 220px 1fr;
   gap: 28px;
-}
-
-.sidebar {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.sidebar-section {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  margin-bottom: 8px;
-}
-
-.sidebar-label {
-  font-size: 10px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--color-text-muted);
-  padding: 8px 12px 4px;
-}
-
-.sidebar-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 9px 12px;
-  border-radius: var(--radius-md);
-  font-size: 14px;
-  color: var(--color-text-secondary);
-  transition: var(--transition);
-  background: none;
-  border: none;
-  width: 100%;
-  text-align: left;
-  cursor: pointer;
-  font-family: var(--font-sans);
-  text-decoration: none;
-}
-
-.sidebar-item:hover {
-  background: var(--color-bg-tertiary);
-  color: var(--color-text-primary);
-}
-
-.sidebar-item.active {
-  background: var(--color-primary-light);
-  color: var(--color-primary);
-  font-weight: 500;
-}
-
-.si-icon {
-  font-size: 15px;
 }
 
 .main-content {
@@ -553,7 +477,7 @@ onMounted(async () => {
 
 .summary-cards {
   display: grid;
-  grid-template-columns: repeat(2, minmax(160px, 220px));
+  grid-template-columns: repeat(3, minmax(150px, 200px));
   gap: 16px;
   margin-bottom: 20px;
 }

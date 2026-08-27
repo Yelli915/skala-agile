@@ -2,53 +2,18 @@
   <div class="page-wrapper">
     <AppHeader />
     <div class="page-layout">
-      <!-- 사이드바 -->
-      <aside class="sidebar">
-        <div class="sidebar-section">
-          <div class="sidebar-label">메뉴</div>
-
-          <router-link
-            to="/courses"
-            class="sidebar-item"
-            :class="{ active: $route.path === '/courses' }"
-          >
-            <span class="si-icon">📚</span> 프로그램 목록
-          </router-link>
-
-          <router-link
-            v-if="!isInstructor"
-            to="/enrollments"
-            class="sidebar-item"
-          >
-            <span class="si-icon">✅</span> 내 참여 목록
-          </router-link>
-
-          <router-link
-            to="/mypage"
-            class="sidebar-item"
-          >
-            <span class="si-icon">⭐</span> 마이페이지
-          </router-link>
-        </div>
-
-        <div class="sidebar-section">
-          <div class="sidebar-label">계정</div>
-          <router-link to="/mypage" class="sidebar-item">
-            <span class="si-icon">👤</span> 마이페이지
-          </router-link>
-          <button class="sidebar-item sidebar-btn" @click="handleLogout">
-            <span class="si-icon">🚪</span> 로그아웃
-          </button>
-        </div>
-      </aside>
+      <AppSidebar />
 
       <!-- 메인 -->
       <main class="main-content">
         <div class="content-header">
           <div>
-            <h1 class="page-title">프로그램 목록</h1>
+            <h1 class="page-title">공동물류 프로그램</h1>
             <p class="page-subtitle" v-if="isInstructor">
               지자체 담당자 계정으로 등록된 프로그램을 확인하고 새 프로그램을 추가할 수 있습니다.
+            </p>
+            <p class="page-subtitle" v-else>
+              우리 지역에서 열린 공동물류 프로그램에 참여해 배송비 부담을 함께 줄여보세요.
             </p>
           </div>
 
@@ -57,7 +22,7 @@
             to="/courses/new"
             class="btn btn-primary create-course-btn"
           >
-            프로그램 등록
+            + 프로그램 등록
           </router-link>
         </div>
 
@@ -85,7 +50,7 @@
           </div>
         </div>
 
-        <!-- 강의 그리드 -->
+        <!-- 프로그램 그리드 -->
         <div v-else-if="filteredCourses.length" class="course-grid fade-in">
           <CourseCard
             v-for="course in filteredCourses"
@@ -96,7 +61,8 @@
 
         <!-- 빈 상태 -->
         <div v-else class="empty-state">
-          <p>해당 카테고리의 프로그램이 없습니다.</p>
+          <p class="empty-icon" aria-hidden="true">📭</p>
+          <p>해당 배송유형의 프로그램이 없습니다.</p>
 
           <router-link
             v-if="isInstructor"
@@ -113,13 +79,12 @@
 
 <script setup>
 import { computed, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
 import AppHeader from '@/components/AppHeader.vue'
+import AppSidebar from '@/components/AppSidebar.vue'
 import CourseCard from '@/components/CourseCard.vue'
 import { useCourseStore } from '@/store/course.js'
 import { useAuthStore } from '@/store/auth.js'
 
-const router = useRouter()
 const courseStore = useCourseStore()
 const auth = useAuthStore()
 
@@ -137,11 +102,6 @@ const filteredCourses = computed(() => {
 
 function selectCategory(cat) {
   courseStore.setCategory(cat)
-}
-
-function handleLogout() {
-  auth.logout()
-  router.push('/')
 }
 
 onMounted(() => {
@@ -164,67 +124,6 @@ onMounted(() => {
   gap: 28px;
 }
 
-/* 사이드바 */
-.sidebar {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.sidebar-section {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  margin-bottom: 8px;
-}
-
-.sidebar-label {
-  font-size: 10px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--color-text-muted);
-  padding: 8px 12px 4px;
-}
-
-.sidebar-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 9px 12px;
-  border-radius: var(--radius-md);
-  font-size: 14px;
-  color: var(--color-text-secondary);
-  transition: var(--transition);
-  background: none;
-  border: none;
-  width: 100%;
-  text-align: left;
-  cursor: pointer;
-  font-family: var(--font-sans);
-  text-decoration: none;
-}
-
-.sidebar-item:hover {
-  background: var(--color-bg-tertiary);
-  color: var(--color-text-primary);
-}
-
-.sidebar-item.active {
-  background: var(--color-primary-light);
-  color: var(--color-primary);
-  font-weight: 500;
-}
-
-.si-icon {
-  font-size: 15px;
-}
-
-.sidebar-btn {
-  color: var(--color-text-secondary);
-}
-
-/* 메인 */
 .main-content {
   min-width: 0;
 }
@@ -247,6 +146,8 @@ onMounted(() => {
   margin-top: 6px;
   font-size: 13px;
   color: var(--color-text-muted);
+  max-width: 520px;
+  line-height: 1.6;
 }
 
 .create-course-btn {
@@ -285,7 +186,7 @@ onMounted(() => {
   border-color: var(--color-primary);
 }
 
-/* 강의 그리드 */
+/* 프로그램 그리드 */
 .course-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -345,9 +246,14 @@ onMounted(() => {
 /* 빈 상태 */
 .empty-state {
   text-align: center;
-  padding: 80px 0;
+  padding: 72px 0;
   color: var(--color-text-muted);
   font-size: 15px;
+}
+
+.empty-icon {
+  font-size: 40px;
+  margin-bottom: 10px;
 }
 
 .empty-action-btn {

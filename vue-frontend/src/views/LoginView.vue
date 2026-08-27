@@ -32,6 +32,9 @@
               계정이 없으신가요?
               <button class="text-btn" @click="showRegister = true">회원가입</button>
             </div>
+            <p class="demo-note">
+              고려대학교 MSA 강의용 데모입니다. 실제 물류·정산·개인정보 처리는 이루어지지 않습니다.
+            </p>
           </div>
 
           <!-- 회원가입 영역 -->
@@ -190,6 +193,16 @@ async function handleRegister() {
   font-size: 13px;
   color: var(--color-text-secondary);
   margin-top: 4px;
+}
+.demo-note {
+  margin-top: 8px;
+  padding: 10px 12px;
+  background: var(--color-bg-tertiary);
+  border-radius: var(--radius-md);
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--color-text-muted);
+  text-align: center;
 }
 .text-btn {
   background: none;

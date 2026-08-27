@@ -16,6 +16,11 @@
   --color-warning: #854F0B;
   --color-warning-light: #FAEEDA;
   --color-danger: #dc2626;
+  /* 지자체 지원금 / 배송비 절감액 등 "덜어낸 금액"을 일관되게 표시하는 보조 그린 */
+  --color-support: #0F8A3B;
+  --color-support-light: #E6F6EC;
+  --color-cold: #0E7C99;
+  --color-cold-light: #E1F3F8;
   --radius-sm: 6px;
   --radius-md: 10px;
   --radius-lg: 14px;
@@ -23,7 +28,8 @@
   --shadow-sm: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
   --shadow-md: 0 4px 16px rgba(0,0,0,0.08), 0 2px 6px rgba(0,0,0,0.04);
   --shadow-lg: 0 10px 32px rgba(0,0,0,0.10), 0 4px 12px rgba(0,0,0,0.06);
-  --font-sans: 'Plus Jakarta Sans', 'Noto Sans KR', sans-serif;
+  --font-sans: 'Pretendard Variable', 'Pretendard', -apple-system, BlinkMacSystemFont,
+    'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', system-ui, sans-serif;
   --transition: all 0.2s ease;
 }
 
@@ -140,3 +146,9 @@ img {
 .badge-purple { background: #EEEDFE; color: #534AB7; }
 .badge-pink   { background: #FBEAF0; color: #993556; }
 .badge-gray   { background: #F1EFE8; color: #5F5E5A; }
+.badge-cyan   { background: var(--color-cold-light); color: var(--color-cold); }
+.badge-slate  { background: #EAEEF3; color: #44566B; }
+.badge-green  { background: var(--color-support-light); color: var(--color-support); }
+
+/* 도메인 공통: 금액에서 덜어낸 지자체 지원금 등을 초록으로 */
+.amount-support { color: var(--color-support); font-weight: 700; }
