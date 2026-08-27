@@ -200,3 +200,22 @@ python main.py     # or: uvicorn main:app --reload --port 8085
 - `application.yml` `datasource.url`/`eureka.client.service-url` point at `localhost` for local `bootRun` but at container names (`lecturedb`, `eureka-server`, `auth-server`) when overridden by `docker-compose.yml` environment variables (`SPRING_PROFILES_ACTIVE=docker` plus `SPRING_DATASOURCE_URL`, etc.) — don't assume the YAML defaults are what's actually used under Docker.
 - `hibernate.ddl-auto: update` is set on every domain service, so entity changes auto-migrate the shared schema on next boot; there's no separate migration tool (Flyway/Liquibase) in this repo.
 - Kafka topic names (`payment.completed`, `enrollment.completed`) are configured per-service under each `application.yml`'s `kafka.topic` block — keep producer/consumer topic strings in sync across `payment-service`, `enrollment-service`, and `recommend-service`.
+
+## Planned domain migration (WIP — display/labeling only, not a backend rename)
+
+> **TOP PRIORITY CONSTRAINT — do not violate this without the user explicitly reopening it:**
+> The lecture's course-marketplace domain is being *presented* as a **지역 공동물류 플랫폼 (regional joint-logistics platform, B2G2B)**, but **all backend names and functionality stay exactly as they are today** — no renaming of services, packages (`com.lecture.<domain>`), directories, entities/DTO fields, DB tables/columns, REST paths, or Kafka topics (`payment.completed`, `enrollment.completed`). **Only `vue-frontend` is modified.** Every backend contract in this file (course-service, enrollment-service, payment-service, user-service, recommend-service, their `internal/*` endpoints, request/response shapes) remains the ground truth and must not be assumed changed.
+
+The frontend re-labels existing backend concepts as the new domain purely at the display layer (Korean copy, route/view naming, category label maps — the same pattern already used in `vue-frontend/src/store/course.js`'s `categoryLabelMap`/`thumbnailMap`), while the underlying API calls and field names keep their current course-platform meaning under the hood:
+
+| Backend concept (unchanged) | Frontend display-only relabel |
+|---|---|
+| `User` role `INSTRUCTOR` | shown as `지자체 담당자` (GOV_OFFICER) — "opens" a program |
+| `User` role `STUDENT` | shown as `소상공인` (MERCHANT) — "applies to join" a program |
+| `Course` (`course-service`, fields like `title`/`category`/`instructorName`/`price`) | shown as `공동물류 프로그램` |
+| `Enrollment` (`enrollment-service`, PENDING→ACTIVE saga) | shown as `참여신청` |
+| `Payment` (`payment-service`) | shown as `정산` (배송비 + 지자체 지원금) |
+| `recommend-service` output | shown as `추천 프로그램` |
+| Course categories (백엔드/프론트엔드/DevOps/데이터/AI) | shown as logistics/product categories — mapping still TBD, same relabel pattern as above |
+
+Still open: the new category label set/thumbnails for the frontend relabel map, and whether `recommend-service`'s output framing needs any wording changes. When doing this work, touch only `vue-frontend/src/**` (views, components, Korean copy, route names/labels, `store/course.js`-style label maps) — never `user-service`, `course-service`, `enrollment-service`, `payment-service`, `recommend-service`, or their API contracts.
