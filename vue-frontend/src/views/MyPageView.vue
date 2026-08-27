@@ -275,8 +275,9 @@
                     </div>
                   </div>
                   <div class="meta-box">
-                    <div class="meta-label">분담금 (지원금 30% 반영)</div>
+                    <div class="meta-label">분담금 (실부담)</div>
                     <div class="meta-value">{{ formatPrice(netBurden(course.price)) }}</div>
+                    <div class="meta-sub">기준액 {{ formatPrice(course.price) }} · 지원금 {{ subsidyPercent }}%</div>
                   </div>
                   <div class="meta-box">
                     <div class="meta-label">참여 소상공인 수</div>
@@ -341,12 +342,13 @@ import CategoryIcon from '@/components/CategoryIcon.vue'
 import { useAuthStore } from '@/store/auth.js'
 import { enrollmentApi } from '@/api/enrollment.js'
 import { courseApi } from '@/api/course.js'
-import { useCourseStore, netBurden } from '@/store/course.js'
+import { useCourseStore, netBurden, SUBSIDY_RATE } from '@/store/course.js'
 
 const auth = useAuthStore()
 const courseStore = useCourseStore()
 
 const isInstructor = computed(() => auth.user?.role === 'INSTRUCTOR')
+const subsidyPercent = Math.round(SUBSIDY_RATE * 100)
 
 /* ── 소상공인: 참여 현황 (GET /api/enrollments/my) ── */
 const myEnrollments = ref([])
@@ -960,6 +962,11 @@ onUnmounted(stopPolling)
   font-size: 14px;
   font-weight: 600;
   color: var(--color-text-primary);
+}
+.meta-sub {
+  margin-top: 4px;
+  font-size: 11px;
+  color: var(--color-text-muted);
 }
 .meta-value-type {
   display: flex;
