@@ -9,15 +9,15 @@ export const useCourseStore = defineStore('course', () => {
   const error = ref(null)
   const selectedCategory = ref('전체')
 
-  const categories = ['전체', '백엔드', '프론트엔드', 'DevOps', '데이터', 'AI']
+  const categories = ['전체', '신선식품', '생활잡화', '의류', '음식점', '기타']
 
   // 백엔드 카테고리 → 프론트 표시용 카테고리
   const categoryLabelMap = {
-    BACKEND: '백엔드',
-    FRONTEND: '프론트엔드',
-    DEVOPS: 'DevOps',
-    DATA: '데이터',
-    AI: 'AI'
+    BACKEND: '신선식품',
+    FRONTEND: '생활잡화',
+    DEVOPS: '의류',
+    DATA: '음식점',
+    AI: '기타'
   }
 
   // 썸네일 이미지 매핑
@@ -31,11 +31,11 @@ export const useCourseStore = defineStore('course', () => {
   }
 
   const categoryThumbnailMap = {
-    '백엔드': thumbnailMap.SPRING,
-    '프론트엔드': thumbnailMap.VUE,
-    'DevOps': thumbnailMap.KUBERNETES,
-    '데이터': thumbnailMap.PYTHON,
-    'AI': thumbnailMap.AI
+    '신선식품': thumbnailMap.SPRING,
+    '생활잡화': thumbnailMap.VUE,
+    '의류': thumbnailMap.KUBERNETES,
+    '음식점': thumbnailMap.PYTHON,
+    '기타': thumbnailMap.AI
   }
 
   function normalizeCategory(category) {
@@ -80,7 +80,7 @@ export const useCourseStore = defineStore('course', () => {
       console.log('[CourseStore] normalized courses =', courses.value)
     } catch (e) {
       console.error('[CourseStore] fetchCourses failed:', e)
-      error.value = e.message || '강의 목록을 불러오지 못했습니다.'
+      error.value = e.message || '프로그램 목록을 불러오지 못했습니다.'
       courses.value = []
     } finally {
       loading.value = false
@@ -105,7 +105,7 @@ export const useCourseStore = defineStore('course', () => {
       console.log('[CourseStore] normalized selectedCourse =', selectedCourse.value)
     } catch (e) {
       console.error('[CourseStore] fetchCourse failed:', e)
-      error.value = e.message || '강의 정보를 불러오지 못했습니다.'
+      error.value = e.message || '프로그램 정보를 불러오지 못했습니다.'
       selectedCourse.value = null
     } finally {
       loading.value = false

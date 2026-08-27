@@ -14,8 +14,8 @@
             </p>
 
             <div class="detail-meta">
-              <span>강사: {{ displayInstructorName }}</span>
-              <span>수강생: {{ displayEnrollmentCount }}명</span>
+              <span>지자체 담당자: {{ displayInstructorName }}</span>
+              <span>참여 소상공인: {{ displayEnrollmentCount }}명</span>
             </div>
           </div>
 
@@ -45,7 +45,7 @@
               </p>
 
               <ul class="enroll-info-list">
-                <li>✅ 즉시 수강 가능</li>
+                <li>✅ 즉시 참여 가능</li>
                 <li>✅ 평생 소장</li>
                 <li>✅ 수료증 발급</li>
               </ul>
@@ -60,7 +60,7 @@
     </div>
 
     <div v-else class="loading-center">
-      <p class="empty-text">강의 정보를 불러오지 못했습니다.</p>
+      <p class="empty-text">프로그램 정보를 불러오지 못했습니다.</p>
     </div>
   </div>
 </template>
@@ -87,11 +87,11 @@ const loading = computed(() => courseStore.loading)
 const isInstructor = computed(() => auth.user?.role === 'INSTRUCTOR')
 
 const categoryConfig = {
-  '백엔드': { badge: 'badge-teal', bg: 'thumb-teal', thumb: 'spring_boot' },
-  '프론트엔드': { badge: 'badge-teal', bg: 'thumb-teal', thumb: 'vue_js' },
-  'DevOps': { badge: 'badge-blue', bg: 'thumb-blue', thumb: 'kubernetes' },
-  '데이터': { badge: 'badge-purple', bg: 'thumb-purple', thumb: 'python' },
-  'AI': { badge: 'badge-pink', bg: 'thumb-pink', thumb: 'generative_ai' },
+  '신선식품': { badge: 'badge-teal', bg: 'thumb-teal', thumb: 'spring_boot' },
+  '생활잡화': { badge: 'badge-teal', bg: 'thumb-teal', thumb: 'vue_js' },
+  '의류': { badge: 'badge-blue', bg: 'thumb-blue', thumb: 'kubernetes' },
+  '음식점': { badge: 'badge-purple', bg: 'thumb-purple', thumb: 'python' },
+  '기타': { badge: 'badge-pink', bg: 'thumb-pink', thumb: 'generative_ai' },
 }
 
 const config = computed(() => categoryConfig[course.value?.category] || {})
@@ -107,7 +107,7 @@ const displayInstructorName = computed(() => {
     course.value?.instructor?.name ||
     course.value?.instructor_name ||
     course.value?.ownerName ||
-    '강사 정보 없음'
+    '지자체 담당자 정보 없음'
   )
 })
 
@@ -137,10 +137,10 @@ const thumbSrc = computed(() => {
 })
 
 const buttonLabel = computed(() => {
-  if (isInstructor.value) return '강사 계정은 신청 불가'
-  if (enrollmentStatus.value === 'ACTIVE') return '내 수강 목록으로 이동'
-  if (enrollmentStatus.value === 'PENDING') return '신청 완료 · 결제 처리 중'
-  return '결제하고 수강하기'
+  if (isInstructor.value) return '지자체 담당자 계정은 신청 불가'
+  if (enrollmentStatus.value === 'ACTIVE') return '내 참여 목록으로 이동'
+  if (enrollmentStatus.value === 'PENDING') return '신청 완료 · 정산 처리 중'
+  return '정산하고 참여하기'
 })
 
 const buttonDisabled = computed(() => {
@@ -152,18 +152,18 @@ const buttonDisabled = computed(() => {
 
 const helperText = computed(() => {
   if (isInstructor.value) {
-    return '강사 계정은 본인 강의를 수강 신청할 수 없습니다.'
+    return '지자체 담당자 계정은 본인 프로그램을 참여 신청할 수 없습니다.'
   }
 
   if (enrollmentStatus.value === 'ACTIVE') {
-    return '이미 수강 중인 강의입니다. 내 수강 목록에서 바로 이어서 학습할 수 있습니다.'
+    return '이미 참여 중인 프로그램입니다. 내 참여 목록에서 바로 이어서 학습할 수 있습니다.'
   }
 
   if (enrollmentStatus.value === 'PENDING') {
-    return '수강 신청이 접수되었습니다. 결제/처리 상태가 반영되면 내 수강 목록에서 확인할 수 있습니다.'
+    return '참여 신청이 접수되었습니다. 정산/처리 상태가 반영되면 내 참여 목록에서 확인할 수 있습니다.'
   }
 
-  return '결제를 진행하면 수강 신청이 함께 처리됩니다.'
+  return '정산을 진행하면 참여 신청이 함께 처리됩니다.'
 })
 
 async function loadEnrollmentStatus() {
@@ -200,12 +200,12 @@ async function handlePrimaryAction() {
   enrollError.value = ''
 
   if (!course.value?.id) {
-    enrollError.value = '강의 정보가 올바르지 않습니다.'
+    enrollError.value = '프로그램 정보가 올바르지 않습니다.'
     return
   }
 
   if (isInstructor.value) {
-    enrollError.value = '강사 계정은 본인 강의를 수강 신청할 수 없습니다.'
+    enrollError.value = '지자체 담당자 계정은 본인 프로그램을 참여 신청할 수 없습니다.'
     return
   }
 
@@ -225,7 +225,7 @@ async function handlePrimaryAction() {
     enrollmentStatus.value = 'PENDING'
   } catch (e) {
     console.error('[CourseDetail] enroll failed:', e)
-    enrollError.value = e.response?.data?.message || '결제/수강 신청에 실패했습니다.'
+    enrollError.value = e.response?.data?.message || '정산/참여 신청에 실패했습니다.'
   } finally {
     enrolling.value = false
   }

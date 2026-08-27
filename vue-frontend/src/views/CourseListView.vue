@@ -12,7 +12,7 @@
             class="sidebar-item"
             :class="{ active: $route.path === '/courses' }"
           >
-            <span class="si-icon">📚</span> 강의 목록
+            <span class="si-icon">📚</span> 프로그램 목록
           </router-link>
 
           <router-link
@@ -20,7 +20,7 @@
             to="/enrollments"
             class="sidebar-item"
           >
-            <span class="si-icon">✅</span> 내 수강 목록
+            <span class="si-icon">✅</span> 내 참여 목록
           </router-link>
 
           <router-link
@@ -46,9 +46,9 @@
       <main class="main-content">
         <div class="content-header">
           <div>
-            <h1 class="page-title">강의 목록</h1>
+            <h1 class="page-title">프로그램 목록</h1>
             <p class="page-subtitle" v-if="isInstructor">
-              강사 계정으로 등록된 강의를 확인하고 새 강의를 추가할 수 있습니다.
+              지자체 담당자 계정으로 등록된 프로그램을 확인하고 새 프로그램을 추가할 수 있습니다.
             </p>
           </div>
 
@@ -57,7 +57,7 @@
             to="/courses/new"
             class="btn btn-primary create-course-btn"
           >
-            강의 등록
+            프로그램 등록
           </router-link>
         </div>
 
@@ -96,14 +96,14 @@
 
         <!-- 빈 상태 -->
         <div v-else class="empty-state">
-          <p>해당 카테고리의 강의가 없습니다.</p>
+          <p>해당 카테고리의 프로그램이 없습니다.</p>
 
           <router-link
             v-if="isInstructor"
             to="/courses/new"
             class="btn btn-primary empty-action-btn"
           >
-            첫 강의 등록하기
+            첫 프로그램 등록하기
           </router-link>
         </div>
       </main>

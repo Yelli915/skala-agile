@@ -6,21 +6,21 @@
     <section class="hero">
       <div class="hero-inner">
         <div class="hero-content fade-in-up">
-          <span class="hero-badge">MSA 기반 교육 플랫폼</span>
+          <span class="hero-badge">MSA 기반 공동물류 플랫폼</span>
           <h1 class="hero-title">배움을 더 스마트하게,<br>커리어를 더 빠르게</h1>
-          <p class="hero-desc">개발, 디자인, 비즈니스 분야의 전문가 강의를 수강하고 실력을 키워보세요.</p>
+          <p class="hero-desc">개발, 디자인, 비즈니스 분야의 전문가 프로그램에 참여하고 실력을 키워보세요.</p>
           <div class="hero-actions">
             <router-link to="/login" class="btn btn-primary btn-lg">무료로 시작하기</router-link>
-            <router-link to="/courses" class="btn btn-outline btn-lg">강의 둘러보기</router-link>
+            <router-link to="/courses" class="btn btn-outline btn-lg">프로그램 둘러보기</router-link>
           </div>
           <div class="hero-stats">
-            <div class="stat"><span class="stat-num">1,200+</span><span class="stat-label">강의</span></div>
-            <div class="stat"><span class="stat-num">340+</span><span class="stat-label">강사</span></div>
-            <div class="stat"><span class="stat-num">28,000+</span><span class="stat-label">수강생</span></div>
+            <div class="stat"><span class="stat-num">1,200+</span><span class="stat-label">프로그램</span></div>
+            <div class="stat"><span class="stat-num">340+</span><span class="stat-label">지자체 담당자</span></div>
+            <div class="stat"><span class="stat-num">28,000+</span><span class="stat-label">참여 소상공인</span></div>
           </div>
         </div>
         <div class="hero-visual fade-in">
-          <img src="@/assets/images/logo/main_logo.png" alt="LearnNexus" class="hero-logo" />
+          <img src="@/assets/images/logo/main_logo.png" alt="물류이음" class="hero-logo" />
         </div>
       </div>
     </section>
@@ -29,7 +29,7 @@
     <section class="popular-section">
       <div class="section-inner">
         <div class="section-header">
-          <h2 class="section-title">인기 강의</h2>
+          <h2 class="section-title">인기 프로그램</h2>
           <router-link to="/login" class="section-link">전체 보기 →</router-link>
         </div>
         <div class="course-grid">
@@ -53,7 +53,7 @@
     <!-- 특징 섹션 -->
     <section class="features-section">
       <div class="section-inner">
-        <h2 class="section-title center">왜 LearnNexus인가요?</h2>
+        <h2 class="section-title center">왜 물류이음인가요?</h2>
         <div class="features-grid">
           <div v-for="f in features" :key="f.title" class="feature-card">
             <div class="feature-icon">{{ f.icon }}</div>
@@ -68,7 +68,7 @@
     <section class="cta-section">
       <div class="cta-inner">
         <h2>지금 바로 시작하세요</h2>
-        <p>수천 명의 개발자들이 LearnNexus와 함께 성장하고 있습니다.</p>
+        <p>수천 명의 개발자들이 물류이음와 함께 성장하고 있습니다.</p>
         <router-link to="/login" class="btn btn-primary btn-lg">무료로 시작하기</router-link>
       </div>
     </section>
@@ -77,10 +77,10 @@
     <footer class="footer">
       <div class="footer-inner">
         <div class="footer-logo">
-          <img src="@/assets/images/logo/main_logo.png" alt="LearnNexus" />
-          <span>LearnNexus</span>
+          <img src="@/assets/images/logo/main_logo.png" alt="물류이음" />
+          <span>물류이음</span>
         </div>
-        <p class="footer-copy">© 2026 LearnNexus. All rights reserved.</p>
+        <p class="footer-copy">© 2026 물류이음. All rights reserved.</p>
       </div>
     </footer>
   </div>
@@ -97,18 +97,18 @@ import pythonImg   from '@/assets/images/courses/python.png'
 import genaiImg    from '@/assets/images/courses/generative_ai.png'
 
 const featuredCourses = [
-  { id:1, title:'Spring Boot MSA 완성', category:'백엔드',    instructor:'김강사', price:'₩89,000', thumbSrc: springImg, thumbBg:'thumb-teal',   badgeClass:'badge-teal'   },
-  { id:2, title:'Vue 3 실전 프로젝트',  category:'프론트엔드', instructor:'이강사', price:'₩69,000', thumbSrc: vueImg,    thumbBg:'thumb-teal',   badgeClass:'badge-teal'   },
-  { id:3, title:'Kubernetes 운영 가이드',category:'DevOps',   instructor:'박강사', price:'₩99,000', thumbSrc: k8sImg,    thumbBg:'thumb-blue',   badgeClass:'badge-blue'   },
-  { id:4, title:'Docker 컨테이너 실전', category:'DevOps',    instructor:'정강사', price:'₩79,000', thumbSrc: dockerImg, thumbBg:'thumb-blue',   badgeClass:'badge-blue'   },
-  { id:5, title:'Python 데이터 분석',   category:'데이터',    instructor:'최강사', price:'₩59,000', thumbSrc: pythonImg, thumbBg:'thumb-purple', badgeClass:'badge-purple' },
-  { id:6, title:'Generative AI 실전',   category:'AI',        instructor:'한강사', price:'₩75,000', thumbSrc: genaiImg,  thumbBg:'thumb-pink',   badgeClass:'badge-pink'   },
+  { id:1, title:'Spring Boot MSA 완성', category:'신선식품', instructor:'김담당관', price:'₩89,000', thumbSrc: springImg, thumbBg:'thumb-teal',   badgeClass:'badge-teal'   },
+  { id:2, title:'Vue 3 실전 프로젝트',  category:'생활잡화', instructor:'이담당관', price:'₩69,000', thumbSrc: vueImg,    thumbBg:'thumb-teal',   badgeClass:'badge-teal'   },
+  { id:3, title:'Kubernetes 운영 가이드',category:'의류',    instructor:'박담당관', price:'₩99,000', thumbSrc: k8sImg,    thumbBg:'thumb-blue',   badgeClass:'badge-blue'   },
+  { id:4, title:'Docker 컨테이너 실전', category:'의류',     instructor:'정담당관', price:'₩79,000', thumbSrc: dockerImg, thumbBg:'thumb-blue',   badgeClass:'badge-blue'   },
+  { id:5, title:'Python 데이터 분석',   category:'음식점',   instructor:'최담당관', price:'₩59,000', thumbSrc: pythonImg, thumbBg:'thumb-purple', badgeClass:'badge-purple' },
+  { id:6, title:'Generative AI 실전',   category:'기타',     instructor:'한담당관', price:'₩75,000', thumbSrc: genaiImg,  thumbBg:'thumb-pink',   badgeClass:'badge-pink'   },
 ]
 
 const features = [
-  { icon:'🚀', title:'실무 중심 커리큘럼', desc:'현업 전문가가 직접 설계한 실무 중심 강의로 빠르게 성장하세요.' },
-  { icon:'🎯', title:'맞춤 강의 추천', desc:'AI 기반 추천 시스템이 수강 이력을 분석해 딱 맞는 강의를 추천합니다.' },
-  { icon:'💳', title:'간편한 수강 신청', desc:'원클릭 결제와 즉시 수강으로 학습을 바로 시작하세요.' },
+  { icon:'🚀', title:'실무 중심 커리큘럼', desc:'현업 전문가가 직접 설계한 실무 중심 프로그램으로 빠르게 성장하세요.' },
+  { icon:'🎯', title:'맞춤 프로그램 추천', desc:'AI 기반 추천 시스템이 참여 이력을 분석해 딱 맞는 프로그램을 추천합니다.' },
+  { icon:'💳', title:'간편한 참여 신청', desc:'원클릭 정산과 즉시 참여로 학습을 바로 시작하세요.' },
   { icon:'📱', title:'언제 어디서나', desc:'PC, 태블릿, 모바일 어디서든 끊김 없이 학습하세요.' },
 ]
 </script>

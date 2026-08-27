@@ -7,7 +7,7 @@
           <div class="sidebar-label">메뉴</div>
 
           <router-link to="/courses" class="sidebar-item">
-            <span class="si-icon">📚</span> 강의 목록
+            <span class="si-icon">📚</span> 프로그램 목록
           </router-link>
 
           <router-link
@@ -15,7 +15,7 @@
             to="/enrollments"
             class="sidebar-item active"
           >
-            <span class="si-icon">✅</span> 내 수강 목록
+            <span class="si-icon">✅</span> 내 참여 목록
           </router-link>
 
           <router-link to="/mypage" class="sidebar-item">
@@ -35,7 +35,7 @@
       </aside>
 
       <main class="main-content">
-        <h1 class="page-title">내 수강 목록</h1>
+        <h1 class="page-title">내 참여 목록</h1>
 
         <div v-if="loading" class="loading-center">
           <div class="spinner"></div>
@@ -52,7 +52,7 @@
                 {{ item.course?.category }}
               </span>
               <h3 class="enroll-title">{{ item.course?.title }}</h3>
-              <p class="enroll-instructor">강사: {{ item.course?.instructorName }}</p>
+              <p class="enroll-instructor">지자체 담당자: {{ item.course?.instructorName }}</p>
             </div>
 
             <div class="enroll-status">
@@ -62,10 +62,10 @@
                   item.status === 'ACTIVE' ? 'status-active' : 'status-pending'
                 ]"
               >
-                {{ item.status === 'ACTIVE' ? '수강 중' : '대기 중' }}
+                {{ item.status === 'ACTIVE' ? '참여 중' : '대기 중' }}
               </span>
               <router-link :to="`/courses/${item.courseId}`" class="btn btn-ghost btn-sm">
-                강의 보기
+                프로그램 보기
               </router-link>
             </div>
           </div>
@@ -73,9 +73,9 @@
 
         <div v-else class="empty-state">
           <p class="empty-icon">📭</p>
-          <p>수강 중인 강의가 없습니다.</p>
+          <p>참여 중인 프로그램이 없습니다.</p>
           <router-link to="/courses" class="btn btn-primary" style="margin-top:16px;">
-            강의 둘러보기
+            프로그램 둘러보기
           </router-link>
         </div>
       </main>
@@ -99,11 +99,11 @@ const loading = ref(true)
 const isInstructor = computed(() => auth.user?.role === 'INSTRUCTOR')
 
 const categoryConfig = {
-  '백엔드': { bg: 'thumb-teal', badge: 'badge-teal', thumb: 'spring_boot' },
-  '프론트엔드': { bg: 'thumb-teal', badge: 'badge-teal', thumb: 'vue_js' },
-  'DevOps': { bg: 'thumb-blue', badge: 'badge-blue', thumb: 'kubernetes' },
-  '데이터': { bg: 'thumb-purple', badge: 'badge-purple', thumb: 'python' },
-  'AI': { bg: 'thumb-pink', badge: 'badge-pink', thumb: 'generative_ai' },
+  '신선식품': { bg: 'thumb-teal', badge: 'badge-teal', thumb: 'spring_boot' },
+  '생활잡화': { bg: 'thumb-teal', badge: 'badge-teal', thumb: 'vue_js' },
+  '의류': { bg: 'thumb-blue', badge: 'badge-blue', thumb: 'kubernetes' },
+  '음식점': { bg: 'thumb-purple', badge: 'badge-purple', thumb: 'python' },
+  '기타': { bg: 'thumb-pink', badge: 'badge-pink', thumb: 'generative_ai' },
 }
 
 function getThumbBg(cat) {

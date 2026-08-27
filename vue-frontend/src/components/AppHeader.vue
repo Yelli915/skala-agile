@@ -3,14 +3,14 @@
     <div class="header-inner">
       <!-- 로고 -->
       <router-link to="/" class="logo">
-        <img src="@/assets/images/logo/main_logo.png" alt="LearnNexus" class="logo-img" />
-        <span class="logo-text">LearnNexus</span>
+        <img src="@/assets/images/logo/main_logo.png" alt="물류이음" class="logo-img" />
+        <span class="logo-text">물류이음</span>
       </router-link>
 
       <!-- 네비게이션 -->
       <nav class="nav-links" v-if="auth.isAuthenticated">
-        <router-link to="/courses" class="nav-link" :class="{ active: $route.path.startsWith('/courses') }">강의</router-link>
-        <router-link to="/enrollments" class="nav-link" :class="{ active: $route.path === '/enrollments' }">내 학습</router-link>
+        <router-link to="/courses" class="nav-link" :class="{ active: $route.path.startsWith('/courses') }">프로그램</router-link>
+        <router-link to="/enrollments" class="nav-link" :class="{ active: $route.path === '/enrollments' }">내 참여</router-link>
       </nav>
 
       <!-- 우측 액션 -->

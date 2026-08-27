@@ -15,7 +15,7 @@
         <span class="price">₩{{ Number(course.price).toLocaleString() }}</span>
       </div>
       <div class="card-footer">
-        <span class="enrolled">수강생 {{ course.enrollmentCount?.toLocaleString() }}명</span>
+        <span class="enrolled">참여 소상공인 {{ course.enrollmentCount?.toLocaleString() }}명</span>
       </div>
     </div>
   </router-link>
@@ -29,11 +29,11 @@ const props = defineProps({
 })
 
 const categoryConfig = {
-  '백엔드':    { bg: 'thumb-teal',   badge: 'badge-teal',   thumb: 'spring_boot' },
-  '프론트엔드':{ bg: 'thumb-teal',   badge: 'badge-teal',   thumb: 'vue_js' },
-  'DevOps':   { bg: 'thumb-blue',   badge: 'badge-blue',   thumb: 'docker' },
-  '데이터':   { bg: 'thumb-purple', badge: 'badge-purple', thumb: 'python' },
-  'AI':       { bg: 'thumb-pink',   badge: 'badge-pink',   thumb: 'generative_ai' },
+  '신선식품':  { bg: 'thumb-teal',   badge: 'badge-teal',   thumb: 'spring_boot' },
+  '생활잡화':  { bg: 'thumb-teal',   badge: 'badge-teal',   thumb: 'vue_js' },
+  '의류':     { bg: 'thumb-blue',   badge: 'badge-blue',   thumb: 'docker' },
+  '음식점':   { bg: 'thumb-purple', badge: 'badge-purple', thumb: 'python' },
+  '기타':     { bg: 'thumb-pink',   badge: 'badge-pink',   thumb: 'generative_ai' },
 }
 
 const config = computed(() => categoryConfig[props.course.category] || { bg: 'thumb-gray', badge: 'badge-gray' })
