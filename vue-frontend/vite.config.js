@@ -32,6 +32,15 @@ export default defineConfig({
         changeOrigin: true,
         secure: false
       },
+      // 공개 카탈로그(프로그램 목록/상세)는 게이트웨이가 비로그인 요청에 401을 준다.
+      // course-service 자체는 GET /api/courses 를 permitAll 로 열어두므로, 비로그인 열람은
+      // 게이트웨이를 건너뛰고 course-service(:8082)로 직접 프록시한다. (읽기 전용)
+      '/course-service': {
+        target: 'http://localhost:8082',
+        changeOrigin: true,
+        secure: false,
+        rewrite: (p) => p.replace(/^\/course-service/, '')
+      },
       '/oauth2': { ...authProxy },
       '/login': {
         ...authProxy,

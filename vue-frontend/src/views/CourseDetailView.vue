@@ -112,8 +112,7 @@
                   :disabled="buttonDisabled"
                   :class="{ 'btn-disabled': buttonDisabled }"
                 >
-                  <span v-if="enrolling">처리 중...</span>
-                  <span v-else>{{ buttonLabel }}</span>
+                  {{ buttonLabel }}
                 </button>
 
                 <div v-if="enrollError" class="alert alert-error">{{ enrollError }}</div>
@@ -179,7 +178,6 @@ const router = useRouter()
 const courseStore = useCourseStore()
 const auth = useAuthStore()
 
-const enrolling = ref(false)
 const enrollError = ref('')
 const enrollmentStatus = ref('NONE') // NONE | PENDING | ACTIVE
 
@@ -194,15 +192,6 @@ const badgeClass = computed(() => config.value.badge)
 const thumbBg = computed(() => config.value.bg)
 
 const displayCategory = computed(() => config.value.label)
-
-const displayInstructorName = computed(() => {
-  return (
-    course.value?.instructorName ||
-    course.value?.operatorName ||
-    course.value?.instructor?.name ||
-    '지자체 직접 운영'
-  )
-})
 
 const displayEnrollmentCount = computed(() => {
   const value = Number(
@@ -224,9 +213,6 @@ const subsidyPercent = Math.round(SUBSIDY_RATE * 100)
 // 정산/참여 카드 체크리스트 (정적)
 const infoPoints = ['신청 즉시 접수', '지자체 지원금 자동 반영', '정산 완료 시 참여 확정']
 
-// SAMPLE_PROGRAMS 에는 region 이 있고 course-service 응답에는 없을 수 있어 운영 주체로 대체
-const displayRegion = computed(() => course.value?.region || displayInstructorName.value)
-
 // course-service Course.status(ACTIVE/INACTIVE) → 모집 상태 라벨
 const isRecruiting = computed(() => course.value?.status === 'ACTIVE')
 const displayStatus = computed(() => (isRecruiting.value ? '모집 중' : '모집 마감'))
@@ -244,7 +230,6 @@ const displayOpenDate = computed(() => {
 const specs = computed(() => {
   const rows = [
     { label: '배송 유형', value: displayCategory.value },
-    { label: '운영 주체', value: displayRegion.value },
     { label: '모집 시작일', value: displayOpenDate.value },
   ]
   return rows.filter((r) => r.value != null && r.value !== '')
@@ -254,15 +239,13 @@ const buttonLabel = computed(() => {
   if (isGuest.value) return '로그인하고 참여하기'
   if (isInstructor.value) return '지자체 담당자 계정은 신청 불가'
   if (enrollmentStatus.value === 'ACTIVE') return '내 참여 현황으로 이동'
-  if (enrollmentStatus.value === 'PENDING') return '신청 완료 · 정산 처리 중'
-  return '정산하고 참여하기'
+  if (enrollmentStatus.value === 'PENDING') return '신청 완료 · 정산 상태 보기'
+  return '참여 신청하기'
 })
 
 const buttonDisabled = computed(() => {
-  if (enrolling.value) return true
   if (isGuest.value) return false
   if (isInstructor.value) return true
-  if (enrollmentStatus.value === 'PENDING') return true
   return false
 })
 
@@ -280,10 +263,10 @@ const helperText = computed(() => {
   }
 
   if (enrollmentStatus.value === 'PENDING') {
-    return '참여 신청이 접수되었습니다. 정산 상태가 반영되면 내 참여 현황에서 확인할 수 있습니다.'
+    return '참여 신청이 접수되었습니다. 정산 진행 상태를 확인할 수 있습니다.'
   }
 
-  return '정산을 진행하면 참여 신청이 함께 처리됩니다.'
+  return '분담금 결제 확인 후 참여 신청이 처리됩니다.'
 })
 
 async function loadEnrollmentStatus() {
@@ -339,27 +322,9 @@ async function handlePrimaryAction() {
     return
   }
 
-  if (enrollmentStatus.value === 'PENDING') {
-    return
-  }
-
-  enrolling.value = true
-
-  try {
-    await enrollmentApi.enroll(course.value.id, {
-      title: course.value.title,
-      category: course.value.category,
-      price: course.value.price,
-      instructorName: displayInstructorName.value,
-    })
-    enrollmentStatus.value = 'PENDING'
-    startActivationPolling()
-  } catch (e) {
-    console.error('[CourseDetail] enroll failed:', e)
-    enrollError.value = e.response?.data?.message || '정산/참여 신청에 실패했습니다.'
-  } finally {
-    enrolling.value = false
-  }
+  // 신청 상태 확인 → 분담금 결제 → 참여 신청 → 지원 내용·비용 확인 흐름으로 이동.
+  // (PENDING 이면 apply 화면이 정산 대기 단계로 바로 진입해 폴링한다.)
+  router.push(`/courses/${course.value.id}/apply`)
 }
 
 // PENDING → ACTIVE 전환은 payment.completed Kafka 이벤트로 비동기 처리되고 프론트로 푸시되지 않는다.

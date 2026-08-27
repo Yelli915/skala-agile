@@ -27,10 +27,6 @@
             <dd>{{ programCount.toLocaleString() }}</dd>
           </div>
           <div class="hero-stat">
-            <dt>참여 지역</dt>
-            <dd>{{ regionCount.toLocaleString() }}</dd>
-          </div>
-          <div class="hero-stat">
             <dt>누적 참여 신청</dt>
             <dd>{{ totalApplications.toLocaleString() }}</dd>
           </div>
@@ -120,10 +116,10 @@
               <div class="filter-head">
                 <span class="control-label">배송유형으로 찾기</span>
                 <button
-                  v-if="activeAxis !== '전체'"
+                  v-if="activeAxis !== '전체' || search.trim()"
                   type="button"
                   class="filter-reset"
-                  @click="clearCategory"
+                  @click="clearFilters"
                 >
                   초기화
                 </button>
@@ -206,7 +202,6 @@
               </div>
 
               <div class="card-meta">
-                <span class="operator">{{ operatorOf(course) }}</span>
                 <span class="enroll-count">{{ Number(course.enrollmentCount || 0).toLocaleString() }}곳 신청</span>
               </div>
 
@@ -406,21 +401,9 @@ const isFilteredEmpty = computed(() => {
 const programCount = computed(() =>
   Array.isArray(courseStore.courses) ? courseStore.courses.length : 0
 )
-const regionCount = computed(() => {
-  const set = new Set()
-  for (const c of courseStore.courses ?? []) {
-    const name = c.region || c.instructorName || c.operatorName
-    if (name) set.add(name)
-  }
-  return set.size
-})
 const totalApplications = computed(() =>
   (courseStore.courses ?? []).reduce((sum, c) => sum + (Number(c.enrollmentCount) || 0), 0)
 )
-
-function operatorOf(course) {
-  return course.region || course.instructorName || course.operatorName || '지자체 직접 운영'
-}
 
 function selectAxis(key) {
   courseStore.setCategory(key)
@@ -430,6 +413,13 @@ function toggleLeaf(leaf) {
   courseStore.setCategory(activeLeaf.value === leaf ? activeAxis.value : leaf)
 }
 function clearCategory() {
+  courseStore.setCategory('전체')
+}
+// 검색어 + 배송유형 필터를 함께 초기화 (정렬 기준은 유지)
+function clearFilters() {
+  searchInput.value = ''
+  search.value = ''
+  suggestionsOpen.value = false
   courseStore.setCategory('전체')
 }
 function resetFilters() {
@@ -515,7 +505,7 @@ onUnmounted(() => {
 
 .hero-stats {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: 12px;
   margin: 0;
 }
@@ -952,13 +942,9 @@ onUnmounted(() => {
 }
 .card-meta {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   align-items: center;
   gap: 8px;
-}
-.operator {
-  font-size: 12px;
-  color: var(--color-text-secondary);
 }
 .enroll-count {
   font-size: 12px;

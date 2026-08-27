@@ -37,16 +37,22 @@ export const enrollmentApi = {
   },
 
   /**
-   * 참여 신청. 백엔드 실패 시 목업 저장소에 PENDING 으로 담고
-   * 데모 흐름(정산 대기 → 참여 확정)을 이어갈 수 있게 성공 응답을 흉내낸다.
+   * 참여 신청 = 백엔드 결제 사가 트리거.
+   * POST /api/enrollments 한 번이 PENDING enrollment 생성 + payment-service 동기 호출 +
+   * payment.completed Kafka 발행까지 수행한다. PENDING→ACTIVE 전환은 이후 비동기.
+   *
    * @param {number|string} courseId
    * @param {object} [courseSnapshot] 표시용 course 정보(title/category/price/instructorName)
+   * @param {object} [options]
+   * @param {boolean} [options.allowMockFallback=true] 백엔드 호출 실패 시 목업 신청으로 폴백할지.
+   *   실제 흐름(ProgramApplyView)에서 카탈로그가 실데이터면 false 로 넘겨 진짜 에러를 노출한다.
    */
-  async enroll(courseId, courseSnapshot = {}) {
+  async enroll(courseId, courseSnapshot = {}, options = {}) {
+    const { allowMockFallback = true } = options
     try {
       return await api.post('/api/enrollments', { courseId })
     } catch (error) {
-      if (isMockEnabled()) {
+      if (allowMockFallback && isMockEnabled()) {
         console.warn('[enrollmentApi] POST /api/enrollments 실패 → 데모 목업 신청으로 처리', error)
         const item = addMockEnrollment(courseId, courseSnapshot)
         return { data: { data: item, mock: true }, status: 201 }

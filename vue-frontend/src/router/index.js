@@ -37,6 +37,14 @@ const routes = [
     component: () => import('@/views/CourseDetailView.vue')
   },
   {
+    // 소상공인 참여 체크아웃: 신청 상태 확인 → 분담금 결제 확인 → 참여 신청(POST /api/enrollments)
+    // → 정산 대기 폴링 → 지원 내용·비용 확인. 지자체 담당자는 화면 내부에서 상세로 되돌린다.
+    path: '/courses/:id(\\d+)/apply',
+    name: 'ProgramApply',
+    component: () => import('@/views/ProgramApplyView.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
     // 내 참여 현황은 마이페이지의 한 섹션으로 통합됨. 기존 링크 호환을 위해 리다이렉트만 유지.
     path: '/enrollments',
     redirect: '/mypage'

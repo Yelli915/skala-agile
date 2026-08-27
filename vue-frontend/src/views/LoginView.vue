@@ -134,7 +134,7 @@
 
           <!-- 가입 완료 상태 -->
           <div v-if="registered" class="registered-box">
-            <p class="registered-title">✅ 회원가입이 완료되었습니다</p>
+            <p class="registered-title">✅ {{ registeredRoleLabel }} 회원가입이 완료되었습니다</p>
             <p class="registered-desc">이제 물류이음 계정으로 로그인해 주세요.</p>
             <button class="btn btn-primary btn-cta" @click="switchMode('login')">
               로그인하러 가기 <span class="cta-arrow" aria-hidden="true">→</span>
@@ -142,6 +142,11 @@
           </div>
 
           <form v-else class="form" @submit.prevent="handleRegister" novalidate>
+            <p class="reg-step-hint">
+              {{ registerStep === 1 ? '1 / 2 · 계정 정보' : '2 / 2 · 역할 선택' }}
+            </p>
+
+            <template v-if="registerStep === 1">
             <div class="field">
               <label class="field-label" for="reg-name">이름</label>
               <input
@@ -203,9 +208,11 @@
               </div>
               <p v-if="touched.password && !validPassword" class="field-error">비밀번호는 8자 이상이어야 합니다.</p>
             </div>
+            </template>
 
+            <template v-else>
             <div class="field">
-              <span class="field-label">역할</span>
+              <span class="field-label">어떤 목적으로 이용하시나요?</span>
               <div class="role-grid">
                 <button
                   v-for="role in roles"
@@ -221,13 +228,37 @@
                 </button>
               </div>
             </div>
+            </template>
 
             <div v-if="error" class="alert alert-error">{{ error }}</div>
 
-            <button type="submit" class="btn btn-primary btn-cta" :disabled="loading">
-              <span v-if="loading">가입 중…</span>
-              <span v-else>회원가입</span>
-            </button>
+            <div class="reg-actions">
+              <button
+                v-if="registerStep === 2"
+                type="button"
+                class="btn btn-ghost"
+                @click="registerStep = 1"
+              >
+                이전
+              </button>
+              <button
+                v-if="registerStep === 1"
+                type="button"
+                class="btn btn-primary btn-cta"
+                @click="goToRoleStep"
+              >
+                다음 <span class="cta-arrow" aria-hidden="true">→</span>
+              </button>
+              <button
+                v-else
+                type="submit"
+                class="btn btn-primary btn-cta"
+                :disabled="loading"
+              >
+                <span v-if="loading">가입 중…</span>
+                <span v-else>회원가입</span>
+              </button>
+            </div>
           </form>
 
           <p v-if="!registered" class="switch-hint">
@@ -288,6 +319,8 @@ const loading = ref(false)
 const error = ref('')
 const registered = ref(false)
 const showPassword = ref(false)
+// 회원가입 단계: 1 = 계정 정보, 2 = 역할 선택
+const registerStep = ref(1)
 
 /* 로그인(아이디/비밀번호) */
 const loginForm = reactive({ username: '', password: '' })
@@ -315,6 +348,10 @@ const roles = [
   { value: 'INSTRUCTOR', icon: '🏢', name: '지자체 담당자', desc: '공동물류 프로그램을 개설·운영' },
 ]
 
+const registeredRoleLabel = computed(
+  () => roles.find((r) => r.value === registerForm.role)?.name ?? ''
+)
+
 const validName = computed(() => registerForm.name.length > 0)
 const validEmail = computed(() => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(registerForm.email))
 const validPassword = computed(() => registerForm.password.length >= 8)
@@ -324,6 +361,18 @@ function switchMode(next) {
   mode.value = next
   error.value = ''
   loginError.value = ''
+  if (next === 'register') registerStep.value = 1
+}
+
+/* 1단계 → 2단계(역할 선택). 계정 정보가 유효할 때만 진행. */
+function goToRoleStep() {
+  error.value = ''
+  touched.name = touched.email = touched.password = true
+  if (!formValid.value) {
+    error.value = '입력값을 다시 확인해 주세요.'
+    return
+  }
+  registerStep.value = 2
 }
 
 async function handleLogin() {
@@ -694,6 +743,19 @@ async function handleRegister() {
   background: var(--color-bg-tertiary);
   color: var(--color-text-secondary);
 }
+
+/* 회원가입 단계 */
+.reg-step-hint {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-primary);
+  letter-spacing: 0.02em;
+}
+.reg-actions {
+  display: flex;
+  gap: 10px;
+}
+.reg-actions .btn-cta { flex: 1; }
 
 /* 역할 선택 카드 */
 .role-grid {

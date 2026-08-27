@@ -11,8 +11,7 @@
       <h3 class="card-title">{{ course.title }}</h3>
       <p class="card-blurb">{{ meta.blurb }}</p>
       <div class="card-meta">
-        <span class="operator">{{ operatorName }}</span>
-        <span class="price">분담금 ₩{{ Number(course.price || 0).toLocaleString() }}</span>
+        <span class="price">분담금 ₩{{ netBurden(course.price).toLocaleString() }}</span>
       </div>
       <div class="card-footer">
         <span class="enrolled">현재 {{ Number(course.enrollmentCount || 0).toLocaleString() }}건 참여 신청</span>
@@ -23,7 +22,7 @@
 
 <script setup>
 import { computed } from 'vue'
-import { useCourseStore } from '@/store/course.js'
+import { useCourseStore, netBurden } from '@/store/course.js'
 import CategoryIcon from '@/components/CategoryIcon.vue'
 
 const props = defineProps({
@@ -35,11 +34,6 @@ const courseStore = useCourseStore()
 // course.category는 목록(정규화된 라벨) / 추천·참여 응답(원본 enum) 어느 쪽이든 들어올 수 있다.
 const meta = computed(() => courseStore.categoryMeta(props.course.category))
 const categoryLabel = computed(() => meta.value.label)
-
-// 백엔드 CourseResponse에는 운영 주체 이름 필드가 없다(instructorId만 존재).
-const operatorName = computed(
-  () => props.course.instructorName || props.course.operatorName || '지자체 직접 운영'
-)
 </script>
 
 <style scoped>
@@ -89,13 +83,9 @@ const operatorName = computed(
 }
 .card-meta {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   align-items: center;
   margin-top: auto;
-}
-.operator {
-  font-size: 12px;
-  color: var(--color-text-secondary);
 }
 .price {
   font-size: 14px;

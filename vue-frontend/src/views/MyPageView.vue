@@ -130,6 +130,13 @@
                   >
                     {{ item.status === 'ACTIVE' ? '참여 확정' : '정산 대기' }}
                   </span>
+                  <router-link
+                    v-if="item.status !== 'ACTIVE' && !enrollmentIsMock"
+                    :to="`/courses/${item.courseId}/apply`"
+                    class="btn btn-primary btn-sm"
+                  >
+                    정산 상태 보기
+                  </router-link>
                   <router-link :to="`/courses/${item.courseId}`" class="btn btn-ghost btn-sm">
                     프로그램 보기
                   </router-link>
@@ -167,7 +174,12 @@
             </div>
 
             <div v-else-if="recommendations.length" class="recommend-grid fade-in">
-              <CourseCard v-for="c in recommendations" :key="c.id" :course="c" />
+              <div v-for="c in recommendations" :key="c.id" class="recommend-item">
+                <CourseCard :course="c" />
+                <router-link :to="`/courses/${c.id}/apply`" class="btn btn-primary btn-sm recommend-apply">
+                  이 프로그램 참여 신청
+                </router-link>
+              </div>
             </div>
 
             <p v-else-if="recommendError" class="empty-text">{{ recommendError }}</p>
@@ -263,8 +275,8 @@
                     </div>
                   </div>
                   <div class="meta-box">
-                    <div class="meta-label">분담금 기준액</div>
-                    <div class="meta-value">{{ formatPrice(course.price) }}</div>
+                    <div class="meta-label">분담금 (지원금 30% 반영)</div>
+                    <div class="meta-value">{{ formatPrice(netBurden(course.price)) }}</div>
                   </div>
                   <div class="meta-box">
                     <div class="meta-label">참여 소상공인 수</div>
@@ -329,7 +341,7 @@ import CategoryIcon from '@/components/CategoryIcon.vue'
 import { useAuthStore } from '@/store/auth.js'
 import { enrollmentApi } from '@/api/enrollment.js'
 import { courseApi } from '@/api/course.js'
-import { useCourseStore } from '@/store/course.js'
+import { useCourseStore, netBurden } from '@/store/course.js'
 
 const auth = useAuthStore()
 const courseStore = useCourseStore()
@@ -351,12 +363,9 @@ const pendingEnrollments = computed(() =>
 const sortedEnrollments = computed(() =>
   [...myEnrollments.value].sort((a, b) => Number(b.id ?? 0) - Number(a.id ?? 0))
 )
-// course-service / enrollment-service 어디서든 course.price 를 "분담금"으로 표시해 왔으므로 동일 기준으로 합산.
+// 분담금은 화면 전체에서 지자체 지원금 30% 반영 후 실부담(netBurden) 기준으로 표시·합산한다.
 const totalContribution = computed(() =>
-  myEnrollments.value.reduce((sum, e) => {
-    const price = Number(e.course?.price ?? 0)
-    return sum + (Number.isNaN(price) ? 0 : price)
-  }, 0)
+  myEnrollments.value.reduce((sum, e) => sum + netBurden(e.course?.price), 0)
 )
 
 // item.course.category 는 course-service 가 준 원본 enum. store 가 라벨/색상/아이콘으로 해석.
@@ -850,6 +859,16 @@ onUnmounted(stopPolling)
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 16px;
+}
+.recommend-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.recommend-item > .course-card { flex: 1; }
+.recommend-apply {
+  width: 100%;
+  justify-content: center;
 }
 
 /* ── 지자체 담당자: 필터 ── */

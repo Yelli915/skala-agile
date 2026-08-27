@@ -15,7 +15,12 @@
         </div>
 
         <div class="form-card surface-card">
+          <p class="create-step-hint">
+            {{ createStep === 1 ? '1 / 2 · 프로그램 정보' : '2 / 2 · 분담금 · 지원 조건 설정' }}
+          </p>
+
           <form class="course-form" @submit.prevent="handleSubmit">
+            <template v-if="createStep === 1">
             <div class="form-group">
               <label class="form-label" for="title">프로그램명</label>
               <input
@@ -42,36 +47,52 @@
               </p>
             </div>
 
-            <div class="form-row">
-              <div class="form-group">
-                <label class="form-label" for="category">배송유형</label>
-                <select id="category" v-model="form.category" class="form-select">
-                  <option disabled value="">배송유형을 선택하세요</option>
-                  <option
-                    v-for="option in categoryOptions"
-                    :key="option.value"
-                    :value="option.value"
-                  >
-                    {{ option.label }}
-                  </option>
-                </select>
-                <p v-if="selectedCategoryBlurb" class="form-hint">{{ selectedCategoryBlurb }}</p>
-              </div>
+            <div class="form-group">
+              <label class="form-label" for="category">배송유형</label>
+              <select id="category" v-model="form.category" class="form-select">
+                <option disabled value="">배송유형을 선택하세요</option>
+                <option
+                  v-for="option in categoryOptions"
+                  :key="option.value"
+                  :value="option.value"
+                >
+                  {{ option.label }}
+                </option>
+              </select>
+              <p v-if="selectedCategoryBlurb" class="form-hint">{{ selectedCategoryBlurb }}</p>
+            </div>
+            </template>
 
-              <div class="form-group">
-                <label class="form-label" for="price">참여 분담금 기준액 (원)</label>
-                <input
-                  id="price"
-                  v-model.number="form.price"
-                  type="number"
-                  min="0"
-                  step="1000"
-                  class="form-input"
-                  placeholder="예: 12000"
-                />
-                <p class="form-hint">지자체 지원금 적용 전 배송비 기준액입니다. 소상공인 실부담금은 정산 시 확정됩니다.</p>
+            <template v-else>
+            <div class="form-group">
+              <label class="form-label" for="price">참여 분담금 기준액 (원)</label>
+              <input
+                id="price"
+                v-model.number="form.price"
+                type="number"
+                min="0"
+                step="1000"
+                class="form-input"
+                placeholder="예: 12000"
+              />
+              <p class="form-hint">지자체 지원금 적용 전 배송비 기준액입니다. 소상공인 실부담금은 정산 시 확정됩니다.</p>
+            </div>
+
+            <div class="subsidy-preview">
+              <div class="subsidy-row">
+                <span>분담금 기준액</span>
+                <span>₩{{ previewBase.toLocaleString() }}</span>
+              </div>
+              <div class="subsidy-row subsidy-row-cut">
+                <span>지자체 지원금 ({{ subsidyPercent }}%)</span>
+                <span>− ₩{{ previewSubsidy.toLocaleString() }}</span>
+              </div>
+              <div class="subsidy-row subsidy-row-total">
+                <span>소상공인 실부담금 (예상)</span>
+                <span>₩{{ previewNet.toLocaleString() }}</span>
               </div>
             </div>
+            </template>
 
             <div v-if="validationError" class="alert alert-error">
               {{ validationError }}
@@ -86,11 +107,32 @@
             </div>
 
             <div class="form-actions">
-              <router-link to="/courses" class="btn btn-ghost">
+              <router-link v-if="createStep === 1" to="/courses" class="btn btn-ghost">
                 취소
               </router-link>
+              <button
+                v-else
+                type="button"
+                class="btn btn-ghost"
+                @click="createStep = 1"
+              >
+                이전
+              </button>
 
-              <button type="submit" class="btn btn-primary" :disabled="submitting">
+              <button
+                v-if="createStep === 1"
+                type="button"
+                class="btn btn-primary"
+                @click="goToPriceStep"
+              >
+                다음
+              </button>
+              <button
+                v-else
+                type="submit"
+                class="btn btn-primary"
+                :disabled="submitting"
+              >
                 <span v-if="submitting">등록 중...</span>
                 <span v-else>프로그램 등록</span>
               </button>
@@ -109,7 +151,7 @@ import AppHeader from '@/components/AppHeader.vue'
 import AppSidebar from '@/components/AppSidebar.vue'
 import { courseApi } from '@/api/course.js'
 import { useAuthStore } from '@/store/auth.js'
-import { useCourseStore } from '@/store/course.js'
+import { useCourseStore, netBurden, SUBSIDY_RATE } from '@/store/course.js'
 
 const router = useRouter()
 const auth = useAuthStore()
@@ -126,6 +168,38 @@ const submitting = ref(false)
 const validationError = ref('')
 const submitError = ref('')
 const submitSuccess = ref('')
+
+// 등록 단계: 1 = 프로그램 정보, 2 = 분담금 · 지원 조건
+const createStep = ref(1)
+
+const subsidyPercent = Math.round(SUBSIDY_RATE * 100)
+const previewBase = computed(() => {
+  const v = Number(form.price ?? 0)
+  return Number.isNaN(v) || v < 0 ? 0 : v
+})
+const previewNet = computed(() => netBurden(previewBase.value))
+const previewSubsidy = computed(() => Math.max(0, previewBase.value - previewNet.value))
+
+function goToPriceStep() {
+  validationError.value = ''
+  if (!auth.user || auth.user.role !== 'INSTRUCTOR') {
+    validationError.value = '지자체 담당자 계정만 프로그램을 등록할 수 있습니다.'
+    return
+  }
+  if (!form.title) {
+    validationError.value = '프로그램명을 입력해 주세요.'
+    return
+  }
+  if (!form.description) {
+    validationError.value = '지원 대상·배송 권역·지원 내용을 입력해 주세요.'
+    return
+  }
+  if (!form.category) {
+    validationError.value = '배송유형을 선택해 주세요.'
+    return
+  }
+  createStep.value = 2
+}
 
 // 백엔드 Course.Category enum 8종과 1:1로 매핑된 표시용 배송유형 (store가 단일 소스)
 const categoryOptions = courseStore.categoryOptions
@@ -221,6 +295,37 @@ async function handleSubmit() {
 
 .form-card {
   padding: 24px;
+}
+
+.create-step-hint {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--color-primary);
+  letter-spacing: 0.02em;
+  margin-bottom: 16px;
+}
+
+.subsidy-preview {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+.subsidy-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 11px 14px;
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  border-bottom: 1px solid var(--color-border);
+}
+.subsidy-row:last-child { border-bottom: none; }
+.subsidy-row-cut span:last-child { color: var(--color-support); }
+.subsidy-row-total {
+  background: var(--color-bg-secondary);
+  font-weight: 700;
+  color: var(--color-text-primary);
 }
 
 .course-form {

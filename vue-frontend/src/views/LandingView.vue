@@ -156,7 +156,6 @@
               </div>
 
               <div class="card-meta">
-                <span class="operator">{{ course.operator }}</span>
                 <span class="enroll-count">{{ course.enrollmentCount.toLocaleString() }}곳 참여 신청</span>
               </div>
 
@@ -201,17 +200,6 @@
             <h3 class="feature-title">{{ f.title }}</h3>
             <p class="feature-desc">{{ f.desc }}</p>
           </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- 참여 지자체 -->
-    <section class="regions-section">
-      <div class="section-inner">
-        <h2 class="section-title center">전국 340여 개 지자체가 함께합니다</h2>
-        <div class="region-strip">
-          <span v-for="r in regions" :key="r" class="region-chip">{{ r }}</span>
-          <span class="region-chip region-chip-more">외 327개 지자체</span>
         </div>
       </div>
     </section>
@@ -334,7 +322,6 @@ const featuredCourses = computed(() =>
       id: c.id,
       isSample: isSample.value,
       title: c.title,
-      operator: c.region || c.instructorName || c.operator || '지자체 직접 운영',
       categoryValue,
       label: meta.label,
       badgeClass: meta.badge,
@@ -354,7 +341,17 @@ const allProgramsLink = '/courses'
 
 onMounted(async () => {
   try {
-    const res = await courseApi.getAll()
+    // 로그인 상태면 게이트웨이 경유, 401(비로그인)이면 course-service 직접 조회로 폴백.
+    let res
+    try {
+      res = await courseApi.getAll()
+    } catch (e) {
+      if (e.response?.status === 401) {
+        res = await courseApi.getPublicCourses()
+      } else {
+        throw e
+      }
+    }
     const list = Array.isArray(res.data?.data)
       ? res.data.data
       : Array.isArray(res.data)
@@ -385,12 +382,6 @@ const features = [
   { icon: 'landmark', title: '지자체 지원금 반영', desc: '프로그램별 지자체 지원금이 정산에 자동 반영되어 실부담금만 냅니다.' },
   { icon: 'target',   title: '맞춤 프로그램 추천', desc: '참여 이력을 분석해 우리 가게에 맞는 공동물류 프로그램을 추천합니다.' },
   { icon: 'bolt',     title: '신청 즉시 접수', desc: '원클릭 신청 후 정산이 완료되면 참여가 확정되고 물류 배차가 시작됩니다.' },
-]
-
-const regions = [
-  '서울 성동구', '경기 수원시', '대구 중구', '부산 해운대구', '인천 미추홀구',
-  '광주 서구', '대전 유성구', '울산 남구', '강원 춘천시', '충북 청주시',
-  '전북 전주시', '경남 창원시', '제주 서귀포시',
 ]
 </script>
 
@@ -742,8 +733,7 @@ const regions = [
   color: var(--color-support);
 }
 
-.card-meta { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
-.operator { font-size: 12px; color: var(--color-text-secondary); }
+.card-meta { display: flex; justify-content: flex-end; align-items: center; gap: 8px; }
 .enroll-count { font-size: 12px; font-weight: 600; color: var(--color-text-secondary); white-space: nowrap; }
 
 .card-cta {
@@ -795,32 +785,6 @@ const regions = [
 .feature-icon svg { width: 24px; height: 24px; }
 .feature-title { font-size: 15px; font-weight: 700; color: var(--color-text-primary); margin-bottom: 8px; }
 .feature-desc { font-size: 13px; color: var(--color-text-secondary); line-height: 1.6; }
-
-/* 참여 지자체 */
-.regions-section { padding: 64px 0; background: var(--color-bg-secondary); }
-.regions-section .section-title.center { margin-bottom: 28px; }
-.region-strip {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 10px;
-  max-width: 780px;
-  margin: 0 auto;
-}
-.region-chip {
-  padding: 8px 16px;
-  background: var(--color-bg-primary);
-  border: 1px solid var(--color-border);
-  border-radius: 999px;
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--color-text-primary);
-}
-.region-chip-more {
-  background: var(--color-primary-light);
-  border-color: transparent;
-  color: var(--color-primary);
-}
 
 @media (max-width: 900px) {
   .hero { padding: 52px 0 0; }

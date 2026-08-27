@@ -21,6 +21,16 @@ export const courseApi = {
     return api.get(`/api/courses/${id}`)
   },
 
+  // 비로그인 공개 열람용 — 게이트웨이(401)를 건너뛰고 course-service 로 직접 조회한다.
+  // (프록시 설정: vite.config.js / nginx.conf 의 /course-service)
+  getPublicCourses() {
+    return api.get('/course-service/api/courses')
+  },
+
+  getPublicById(id) {
+    return api.get(`/course-service/api/courses/${id}`)
+  },
+
   create(data) {
     return api.post('/api/courses', data)
   },

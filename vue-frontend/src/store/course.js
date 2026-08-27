@@ -48,19 +48,19 @@ export function netBurden(price) {
  * 실패하거나 등록된 프로그램이 하나도 없을 때만 이 목록이 "예시"로 표시된다.
  *
  * 필드 모양은 course-service 의 CourseResponse 와 맞춘다
- * (id, title, description, category(enum), price, instructorName, enrollmentCount, status, createdAt).
+ * (id, title, description, category(enum), price, enrollmentCount, status, createdAt).
  * id 1~3 은 mockEnrollments.js 의 시드 참여신청 courseId 와 일치시켜, 목업끼리도 앞뒤가 맞게 한다.
  */
 export const SAMPLE_PROGRAMS = [
-  { id: 1, category: 'DATA_SCIENCE', title: '성동구 전통시장 공동배송',       instructorName: '서울 성동구',   region: '서울 성동구',   price: 12000, enrollmentCount: 214, status: 'ACTIVE', createdAt: '2026-07-02T09:00:00Z', description: '성수·왕십리 일대 전통시장 점포 물량을 공동물류센터로 모아 권역 단위로 함께 배송합니다. 지자체가 건당 배송비의 일부를 지원합니다.' },
-  { id: 2, category: 'FRONTEND',     title: '수원 전통시장 정기 묶음배송',     instructorName: '경기 수원시',   region: '경기 수원시',   price: 9000,  enrollmentCount: 187, status: 'ACTIVE', createdAt: '2026-07-05T09:00:00Z', description: '주 2회(화·금) 고정 스케줄로 예약 물량을 묶어 정기 배송합니다. 소규모 점포도 정기 물류비를 예측할 수 있습니다.' },
-  { id: 3, category: 'BACKEND',      title: '대구 중구 당일 공동배송',         instructorName: '대구 중구',     region: '대구 중구',     price: 15000, enrollmentCount: 156, status: 'ACTIVE', createdAt: '2026-07-08T09:00:00Z', description: '오전 11시 이전 접수 물량을 모아 당일 오후에 공동 배송합니다. 도심 상권의 빠른 배송 수요에 대응합니다.' },
-  { id: 4, category: 'DEVOPS',       title: '해운대 수산물 냉장 공동배송',     instructorName: '부산 해운대구', region: '부산 해운대구', price: 18000, enrollmentCount: 132, status: 'ACTIVE', createdAt: '2026-07-11T09:00:00Z', description: '콜드체인 차량으로 수산·신선식품을 0~5℃ 유지 상태로 함께 배송합니다. 냉장 포장재는 지자체가 무상 제공합니다.' },
-  { id: 5, category: 'MOBILE',       title: '미추홀 지역상권 라스트마일 배송', instructorName: '인천 미추홀구', region: '인천 미추홀구', price: 8000,  enrollmentCount: 98,  status: 'ACTIVE', createdAt: '2026-07-14T09:00:00Z', description: '지역 상권 거점에서 소비자 문 앞까지 마지막 구간을 공동 배송합니다. 반경 3km 내 당일·익일 배송을 지원합니다.' },
-  { id: 6, category: 'DATABASE',     title: '광주 서구 공동보관·배송',         instructorName: '광주 서구',     region: '광주 서구',     price: 21000, enrollmentCount: 71,  status: 'ACTIVE', createdAt: '2026-07-17T09:00:00Z', description: '권역 물류창고에 재고를 함께 보관하고 주문이 들어오면 순차 출고·배송합니다. 매장 보관 공간 부담을 덜 수 있습니다.' },
-  { id: 7, category: 'SECURITY',     title: '유성구 정밀장비 안심 공동배송',   instructorName: '대전 유성구',   region: '대전 유성구',   price: 16000, enrollmentCount: 54,  status: 'ACTIVE', createdAt: '2026-07-20T09:00:00Z', description: '고가·파손주의 품목을 완충 포장 후 전담 기사가 함께 배송합니다. 배송 전 구간 위치 추적이 제공됩니다.' },
-  { id: 8, category: 'DEVOPS',       title: '춘천 로컬푸드 냉장 묶음배송',     instructorName: '강원 춘천시',   region: '강원 춘천시',   price: 13000, enrollmentCount: 42,  status: 'ACTIVE', createdAt: '2026-07-23T09:00:00Z', description: '지역 농가·로컬푸드 매장의 냉장 물량을 주 단위로 묶어 배송합니다. 산지-매장-소비자 구간을 한 번에 연결합니다.' },
-  { id: 9, category: 'FRONTEND',     title: '창원 산단상가 정기 공동배송',     instructorName: '경남 창원시',   region: '경남 창원시',   price: 10000, enrollmentCount: 33,  status: 'ACTIVE', createdAt: '2026-07-26T09:00:00Z', description: '산업단지 내 상가·식자재 매장 물량을 정기 스케줄로 함께 배송합니다. 입주 업체 공동 계약으로 단가를 낮췄습니다.' },
+  { id: 1, category: 'DATA_SCIENCE', title: '성동구 전통시장 공동배송',       price: 12000, enrollmentCount: 214, status: 'ACTIVE', createdAt: '2026-07-02T09:00:00Z', description: '성수·왕십리 일대 전통시장 점포 물량을 공동물류센터로 모아 권역 단위로 함께 배송합니다. 지자체가 건당 배송비의 일부를 지원합니다.' },
+  { id: 2, category: 'FRONTEND',     title: '수원 전통시장 정기 묶음배송',     price: 9000,  enrollmentCount: 187, status: 'ACTIVE', createdAt: '2026-07-05T09:00:00Z', description: '주 2회(화·금) 고정 스케줄로 예약 물량을 묶어 정기 배송합니다. 소규모 점포도 정기 물류비를 예측할 수 있습니다.' },
+  { id: 3, category: 'BACKEND',      title: '대구 중구 당일 공동배송',         price: 15000, enrollmentCount: 156, status: 'ACTIVE', createdAt: '2026-07-08T09:00:00Z', description: '오전 11시 이전 접수 물량을 모아 당일 오후에 공동 배송합니다. 도심 상권의 빠른 배송 수요에 대응합니다.' },
+  { id: 4, category: 'DEVOPS',       title: '해운대 수산물 냉장 공동배송',     price: 18000, enrollmentCount: 132, status: 'ACTIVE', createdAt: '2026-07-11T09:00:00Z', description: '콜드체인 차량으로 수산·신선식품을 0~5℃ 유지 상태로 함께 배송합니다. 냉장 포장재는 지자체가 무상 제공합니다.' },
+  { id: 5, category: 'MOBILE',       title: '미추홀 지역상권 라스트마일 배송', price: 8000,  enrollmentCount: 98,  status: 'ACTIVE', createdAt: '2026-07-14T09:00:00Z', description: '지역 상권 거점에서 소비자 문 앞까지 마지막 구간을 공동 배송합니다. 반경 3km 내 당일·익일 배송을 지원합니다.' },
+  { id: 6, category: 'DATABASE',     title: '광주 서구 공동보관·배송',         price: 21000, enrollmentCount: 71,  status: 'ACTIVE', createdAt: '2026-07-17T09:00:00Z', description: '권역 물류창고에 재고를 함께 보관하고 주문이 들어오면 순차 출고·배송합니다. 매장 보관 공간 부담을 덜 수 있습니다.' },
+  { id: 7, category: 'SECURITY',     title: '유성구 정밀장비 안심 공동배송',   price: 16000, enrollmentCount: 54,  status: 'ACTIVE', createdAt: '2026-07-20T09:00:00Z', description: '고가·파손주의 품목을 완충 포장 후 전담 기사가 함께 배송합니다. 배송 전 구간 위치 추적이 제공됩니다.' },
+  { id: 8, category: 'DEVOPS',       title: '춘천 로컬푸드 냉장 묶음배송',     price: 13000, enrollmentCount: 42,  status: 'ACTIVE', createdAt: '2026-07-23T09:00:00Z', description: '지역 농가·로컬푸드 매장의 냉장 물량을 주 단위로 묶어 배송합니다. 산지-매장-소비자 구간을 한 번에 연결합니다.' },
+  { id: 9, category: 'FRONTEND',     title: '창원 산단상가 정기 공동배송',     price: 10000, enrollmentCount: 33,  status: 'ACTIVE', createdAt: '2026-07-26T09:00:00Z', description: '산업단지 내 상가·식자재 매장 물량을 정기 스케줄로 함께 배송합니다. 입주 업체 공동 계약으로 단가를 낮췄습니다.' },
 ]
 
 const SAMPLE_BY_ID = Object.fromEntries(SAMPLE_PROGRAMS.map((p) => [String(p.id), p]))
@@ -139,7 +139,17 @@ export const useCourseStore = defineStore('course', () => {
     error.value = null
 
     try {
-      const res = await courseApi.getAll()
+      // 로그인 상태면 게이트웨이 경유, 401(비로그인)이면 course-service 직접 조회로 폴백.
+      let res
+      try {
+        res = await courseApi.getAll()
+      } catch (e) {
+        if (e.response?.status === 401) {
+          res = await courseApi.getPublicCourses()
+        } else {
+          throw e
+        }
+      }
       console.log('[CourseStore] fetchCourses response =', res.data)
 
       const rawCourses = Array.isArray(res.data?.data)
@@ -180,7 +190,16 @@ export const useCourseStore = defineStore('course', () => {
     error.value = null
 
     try {
-      const res = await courseApi.getById(id)
+      let res
+      try {
+        res = await courseApi.getById(id)
+      } catch (e) {
+        if (e.response?.status === 401) {
+          res = await courseApi.getPublicById(id)
+        } else {
+          throw e
+        }
+      }
       console.log('[CourseStore] fetchCourse response =', res.data)
 
       const rawCourse =

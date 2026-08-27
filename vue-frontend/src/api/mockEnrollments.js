@@ -33,35 +33,35 @@ const SEED_ENROLLMENTS = [
     courseId: 1,
     status: 'ACTIVE',
     createdAt: '2026-07-30T09:00:00Z',
-    course: { id: 1, title: '성동구 전통시장 공동배송', category: 'DATA_SCIENCE', price: 12000, instructorName: '서울 성동구' },
+    course: { id: 1, title: '성동구 전통시장 공동배송', category: 'DATA_SCIENCE', price: 12000 },
   },
   {
     id: 90002,
     courseId: 4,
     status: 'PENDING',
     createdAt: '2026-08-06T09:00:00Z',
-    course: { id: 4, title: '해운대 수산물 냉장 공동배송', category: 'DEVOPS', price: 18000, instructorName: '부산 해운대구' },
+    course: { id: 4, title: '해운대 수산물 냉장 공동배송', category: 'DEVOPS', price: 18000 },
   },
   {
     id: 90003,
     courseId: 3,
     status: 'ACTIVE',
     createdAt: '2026-08-12T09:00:00Z',
-    course: { id: 3, title: '대구 중구 당일 공동배송', category: 'BACKEND', price: 15000, instructorName: '대구 중구' },
+    course: { id: 3, title: '대구 중구 당일 공동배송', category: 'BACKEND', price: 15000 },
   },
   {
     id: 90004,
     courseId: 7,
     status: 'PENDING',
     createdAt: '2026-08-19T09:00:00Z',
-    course: { id: 7, title: '유성구 정밀장비 안심 공동배송', category: 'SECURITY', price: 16000, instructorName: '대전 유성구' },
+    course: { id: 7, title: '유성구 정밀장비 안심 공동배송', category: 'SECURITY', price: 16000 },
   },
   {
     id: 90005,
     courseId: 6,
     status: 'ACTIVE',
     createdAt: '2026-08-23T09:00:00Z',
-    course: { id: 6, title: '광주 서구 공동보관·배송', category: 'DATABASE', price: 21000, instructorName: '광주 서구' },
+    course: { id: 6, title: '광주 서구 공동보관·배송', category: 'DATABASE', price: 21000 },
   },
   {
     id: 90006,
@@ -69,7 +69,7 @@ const SEED_ENROLLMENTS = [
     status: 'PENDING',
     simulate: true,
     createdAt: '2026-08-27T09:00:00Z',
-    course: { id: 2, title: '수원 전통시장 정기 묶음배송', category: 'FRONTEND', price: 9000, instructorName: '경기 수원시' },
+    course: { id: 2, title: '수원 전통시장 정기 묶음배송', category: 'FRONTEND', price: 9000 },
   },
 ]
 
@@ -147,7 +147,7 @@ export function hasMockEnrollment(courseId) {
 /**
  * 새 목업 신청을 PENDING 으로 추가한다.
  * @param {number|string} courseId
- * @param {object} [courseSnapshot] 화면에 표시할 course 정보(title/category/price/instructorName)
+ * @param {object} [courseSnapshot] 화면에 표시할 course 정보(title/category/price)
  * @returns {object} 추가된 enrollment 항목
  */
 export function addMockEnrollment(courseId, courseSnapshot = {}) {
@@ -163,8 +163,6 @@ export function addMockEnrollment(courseId, courseSnapshot = {}) {
     title: courseSnapshot.title || seed?.course.title || `공동물류 프로그램 #${courseId}`,
     category: courseSnapshot.category || seed?.course.category || 'OTHER',
     price: Number(courseSnapshot.price ?? seed?.course.price ?? 0),
-    instructorName:
-      courseSnapshot.instructorName || courseSnapshot.operatorName || seed?.course.instructorName || '지자체 직접 운영',
   }
 
   const item = {
