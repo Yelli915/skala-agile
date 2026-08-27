@@ -58,7 +58,7 @@
                 v-model.trim="form.title"
                 type="text"
                 class="form-input"
-                placeholder="예: Cloud Native App기반 Web Service 개발"
+                placeholder="예: 성동구 신선식품 새벽 공동배송 프로그램"
                 maxlength="100"
               />
             </div>
@@ -70,15 +70,15 @@
                 v-model.trim="form.description"
                 class="form-textarea"
                 rows="6"
-                placeholder="프로그램 소개, 학습 목표, 대상 등을 입력해 주세요."
+                placeholder="프로그램 개요, 지원 대상 소상공인, 배송 권역, 지자체 지원 내용 등을 입력해 주세요."
               ></textarea>
             </div>
 
             <div class="form-row">
               <div class="form-group">
-                <label class="form-label" for="category">카테고리</label>
+                <label class="form-label" for="category">상품군</label>
                 <select id="category" v-model="form.category" class="form-select">
-                  <option disabled value="">카테고리를 선택하세요</option>
+                  <option disabled value="">상품군을 선택하세요</option>
                   <option
                     v-for="option in categoryOptions"
                     :key="option.value"
@@ -90,7 +90,7 @@
               </div>
 
               <div class="form-group">
-                <label class="form-label" for="price">가격</label>
+                <label class="form-label" for="price">참여 분담금 기준액</label>
                 <input
                   id="price"
                   v-model.number="form.price"
@@ -98,7 +98,7 @@
                   min="0"
                   step="1000"
                   class="form-input"
-                  placeholder="예: 50000"
+                  placeholder="예: 12000"
                 />
               </div>
             </div>
@@ -138,9 +138,11 @@ import { useRouter } from 'vue-router'
 import AppHeader from '@/components/AppHeader.vue'
 import { courseApi } from '@/api/course.js'
 import { useAuthStore } from '@/store/auth.js'
+import { useCourseStore } from '@/store/course.js'
 
 const router = useRouter()
 const auth = useAuthStore()
+const courseStore = useCourseStore()
 
 const form = reactive({
   title: '',
@@ -154,12 +156,8 @@ const validationError = ref('')
 const submitError = ref('')
 const submitSuccess = ref('')
 
-const categoryOptions = [
-  { label: '신선식품', value: 'BACKEND' },
-  { label: '생활잡화', value: 'FRONTEND' },
-  { label: '의류', value: 'DEVOPS' },
-  { label: '음식점 · 기타', value: 'DATA_SCIENCE' }
-]
+// 백엔드 Course.Category enum 8종과 1:1로 매핑된 표시용 상품군 (store가 단일 소스)
+const categoryOptions = courseStore.categoryOptions
 
 function handleLogout() {
   auth.logout()
@@ -185,18 +183,18 @@ function validateForm() {
   }
 
   if (!form.category) {
-    validationError.value = '카테고리를 선택해 주세요.'
+    validationError.value = '상품군을 선택해 주세요.'
     return false
   }
 
   if (form.price === null || form.price === undefined || form.price === '') {
-    validationError.value = '가격을 입력해 주세요.'
+    validationError.value = '참여 분담금 기준액을 입력해 주세요.'
     return false
   }
 
   const price = Number(form.price)
   if (Number.isNaN(price) || price < 0) {
-    validationError.value = '가격은 0 이상의 숫자로 입력해 주세요.'
+    validationError.value = '참여 분담금 기준액은 0 이상의 숫자로 입력해 주세요.'
     return false
   }
 

@@ -10,11 +10,11 @@
             <span class="badge" :class="badgeClass">{{ displayCategory }}</span>
             <h1 class="detail-title">{{ course.title }}</h1>
             <p class="detail-desc">
-              {{ course.description || '실무 전문가가 직접 설계한 커리큘럼으로 체계적으로 학습하세요.' }}
+              {{ course.description || '지역 공동물류 프로그램입니다. 신청 후 정산이 완료되면 참여가 확정됩니다.' }}
             </p>
 
             <div class="detail-meta">
-              <span>지자체 담당자: {{ displayInstructorName }}</span>
+              <span>운영 주체: {{ displayInstructorName }}</span>
               <span>참여 소상공인: {{ displayEnrollmentCount }}명</span>
             </div>
           </div>
@@ -26,7 +26,11 @@
             </div>
 
             <div class="enroll-body">
+              <div class="enroll-price-label">참여 분담금 (배송비 · 지자체 지원금 반영)</div>
               <div class="enroll-price">₩{{ displayPrice }}</div>
+              <p class="price-note">
+                표시 금액은 프로그램 기준 분담금이며, 실제 청구액은 정산 시 지자체 지원금 적용 후 확정됩니다.
+              </p>
 
               <button
                 class="btn btn-primary btn-full"
@@ -45,9 +49,9 @@
               </p>
 
               <ul class="enroll-info-list">
-                <li>✅ 즉시 참여 가능</li>
-                <li>✅ 평생 소장</li>
-                <li>✅ 수료증 발급</li>
+                <li>✅ 신청 즉시 접수</li>
+                <li>✅ 지자체 지원금 자동 반영</li>
+                <li>✅ 정산 완료 시 참여 확정</li>
               </ul>
             </div>
           </div>
@@ -66,7 +70,7 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import AppHeader from '@/components/AppHeader.vue'
 import { useCourseStore } from '@/store/course.js'
@@ -86,28 +90,19 @@ const course = computed(() => courseStore.selectedCourse)
 const loading = computed(() => courseStore.loading)
 const isInstructor = computed(() => auth.user?.role === 'INSTRUCTOR')
 
-const categoryConfig = {
-  '신선식품': { badge: 'badge-teal', bg: 'thumb-teal', thumb: 'spring_boot' },
-  '생활잡화': { badge: 'badge-teal', bg: 'thumb-teal', thumb: 'vue_js' },
-  '의류': { badge: 'badge-blue', bg: 'thumb-blue', thumb: 'kubernetes' },
-  '음식점': { badge: 'badge-purple', bg: 'thumb-purple', thumb: 'python' },
-  '기타': { badge: 'badge-pink', bg: 'thumb-pink', thumb: 'generative_ai' },
-}
+// 카테고리 메타(라벨/배지/썸네일)는 store가 단일 소스. course.category는 정규화된 라벨.
+const config = computed(() => courseStore.categoryMeta(course.value?.category))
+const badgeClass = computed(() => config.value.badge)
+const thumbBg = computed(() => config.value.bg)
 
-const config = computed(() => categoryConfig[course.value?.category] || {})
-const badgeClass = computed(() => config.value.badge || 'badge-gray')
-const thumbBg = computed(() => config.value.bg || 'thumb-gray')
-
-const displayCategory = computed(() => course.value?.category || '-')
+const displayCategory = computed(() => config.value.label)
 
 const displayInstructorName = computed(() => {
   return (
     course.value?.instructorName ||
-    course.value?.teacherName ||
+    course.value?.operatorName ||
     course.value?.instructor?.name ||
-    course.value?.instructor_name ||
-    course.value?.ownerName ||
-    '지자체 담당자 정보 없음'
+    '지자체 직접 운영'
   )
 })
 
@@ -125,16 +120,7 @@ const displayPrice = computed(() => {
   return Number.isNaN(value) ? '0' : value.toLocaleString()
 })
 
-const thumbSrc = computed(() => {
-  const key = course.value?.thumbnail || config.value.thumb
-  if (!key) return null
-
-  try {
-    return new URL(`../assets/images/courses/${key}.png`, import.meta.url).href
-  } catch {
-    return null
-  }
-})
+const thumbSrc = computed(() => config.value.thumb)
 
 const buttonLabel = computed(() => {
   if (isInstructor.value) return '지자체 담당자 계정은 신청 불가'
@@ -156,7 +142,7 @@ const helperText = computed(() => {
   }
 
   if (enrollmentStatus.value === 'ACTIVE') {
-    return '이미 참여 중인 프로그램입니다. 내 참여 목록에서 바로 이어서 학습할 수 있습니다.'
+    return '이미 참여 중인 프로그램입니다. 내 참여 목록에서 진행 상태를 확인할 수 있습니다.'
   }
 
   if (enrollmentStatus.value === 'PENDING') {
@@ -223,6 +209,7 @@ async function handlePrimaryAction() {
   try {
     await enrollmentApi.enroll(course.value.id)
     enrollmentStatus.value = 'PENDING'
+    startActivationPolling()
   } catch (e) {
     console.error('[CourseDetail] enroll failed:', e)
     enrollError.value = e.response?.data?.message || '정산/참여 신청에 실패했습니다.'
@@ -231,11 +218,41 @@ async function handlePrimaryAction() {
   }
 }
 
+// PENDING → ACTIVE 전환은 payment.completed Kafka 이벤트로 비동기 처리되고 프론트로 푸시되지 않는다.
+// 백엔드 변경 없이, 기존 GET /api/enrollments/my 를 잠시 폴링해 확정 여부를 반영한다.
+const POLL_INTERVAL = 3000
+const POLL_MAX_TRIES = 8
+let pollTimer = null
+
+function stopActivationPolling() {
+  if (pollTimer) {
+    clearInterval(pollTimer)
+    pollTimer = null
+  }
+}
+
+function startActivationPolling() {
+  if (pollTimer || enrollmentStatus.value !== 'PENDING') return
+
+  let tries = 0
+  pollTimer = setInterval(async () => {
+    tries += 1
+    await loadEnrollmentStatus()
+    if (enrollmentStatus.value !== 'PENDING' || tries >= POLL_MAX_TRIES) {
+      stopActivationPolling()
+    }
+  }, POLL_INTERVAL)
+}
+
 onMounted(async () => {
   await courseStore.fetchCourse(route.params.id)
   console.log('[CourseDetail] selectedCourse =', courseStore.selectedCourse)
   await loadEnrollmentStatus()
+  // 다른 화면에서 신청만 하고 넘어온 경우에도 확정을 이어서 감지
+  startActivationPolling()
 })
+
+onUnmounted(stopActivationPolling)
 
 watch(
   () => courseStore.selectedCourse,
@@ -332,10 +349,23 @@ watch(
   gap: 14px;
 }
 
+.enroll-price-label {
+  font-size: 12px;
+  color: var(--color-text-muted);
+  margin-bottom: -6px;
+}
+
 .enroll-price {
   font-size: 26px;
   font-weight: 700;
   color: var(--color-primary);
+}
+
+.price-note {
+  font-size: 12px;
+  color: var(--color-text-muted);
+  line-height: 1.5;
+  margin-top: -4px;
 }
 
 .btn-full {

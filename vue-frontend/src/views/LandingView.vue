@@ -6,16 +6,16 @@
     <section class="hero">
       <div class="hero-inner">
         <div class="hero-content fade-in-up">
-          <span class="hero-badge">MSA 기반 공동물류 플랫폼</span>
-          <h1 class="hero-title">배움을 더 스마트하게,<br>커리어를 더 빠르게</h1>
-          <p class="hero-desc">개발, 디자인, 비즈니스 분야의 전문가 프로그램에 참여하고 실력을 키워보세요.</p>
+          <span class="hero-badge">MSA 기반 지역 공동물류 플랫폼</span>
+          <h1 class="hero-title">지역이 함께 나르면,<br>배송비는 내려갑니다</h1>
+          <p class="hero-desc">지자체가 여는 공동물류 프로그램에 참여하고, 소상공인 배송비 부담을 함께 줄여보세요.</p>
           <div class="hero-actions">
             <router-link to="/login" class="btn btn-primary btn-lg">무료로 시작하기</router-link>
             <router-link to="/courses" class="btn btn-outline btn-lg">프로그램 둘러보기</router-link>
           </div>
           <div class="hero-stats">
-            <div class="stat"><span class="stat-num">1,200+</span><span class="stat-label">프로그램</span></div>
-            <div class="stat"><span class="stat-num">340+</span><span class="stat-label">지자체 담당자</span></div>
+            <div class="stat"><span class="stat-num">1,200+</span><span class="stat-label">공동물류 프로그램</span></div>
+            <div class="stat"><span class="stat-num">340+</span><span class="stat-label">참여 지자체</span></div>
             <div class="stat"><span class="stat-num">28,000+</span><span class="stat-label">참여 소상공인</span></div>
           </div>
         </div>
@@ -53,7 +53,7 @@
     <!-- 특징 섹션 -->
     <section class="features-section">
       <div class="section-inner">
-        <h2 class="section-title center">왜 물류이음인가요?</h2>
+        <h2 class="section-title center">왜 물류이음일까요?</h2>
         <div class="features-grid">
           <div v-for="f in features" :key="f.title" class="feature-card">
             <div class="feature-icon">{{ f.icon }}</div>
@@ -67,8 +67,8 @@
     <!-- CTA -->
     <section class="cta-section">
       <div class="cta-inner">
-        <h2>지금 바로 시작하세요</h2>
-        <p>수천 명의 개발자들이 물류이음와 함께 성장하고 있습니다.</p>
+        <h2>지금 바로 참여하세요</h2>
+        <p>전국 340여 개 지자체와 28,000여 소상공인이 물류이음으로 배송비를 함께 줄이고 있습니다.</p>
         <router-link to="/login" class="btn btn-primary btn-lg">무료로 시작하기</router-link>
       </div>
     </section>
@@ -96,20 +96,21 @@ import dockerImg   from '@/assets/images/courses/docker.png'
 import pythonImg   from '@/assets/images/courses/python.png'
 import genaiImg    from '@/assets/images/courses/generative_ai.png'
 
+// 랜딩 노출용 예시 데이터(로그인 전 화면). 실제 목록은 로그인 후 /courses에서 course-service로부터 불러온다.
 const featuredCourses = [
-  { id:1, title:'Spring Boot MSA 완성', category:'신선식품', instructor:'김담당관', price:'₩89,000', thumbSrc: springImg, thumbBg:'thumb-teal',   badgeClass:'badge-teal'   },
-  { id:2, title:'Vue 3 실전 프로젝트',  category:'생활잡화', instructor:'이담당관', price:'₩69,000', thumbSrc: vueImg,    thumbBg:'thumb-teal',   badgeClass:'badge-teal'   },
-  { id:3, title:'Kubernetes 운영 가이드',category:'의류',    instructor:'박담당관', price:'₩99,000', thumbSrc: k8sImg,    thumbBg:'thumb-blue',   badgeClass:'badge-blue'   },
-  { id:4, title:'Docker 컨테이너 실전', category:'의류',     instructor:'정담당관', price:'₩79,000', thumbSrc: dockerImg, thumbBg:'thumb-blue',   badgeClass:'badge-blue'   },
-  { id:5, title:'Python 데이터 분석',   category:'음식점',   instructor:'최담당관', price:'₩59,000', thumbSrc: pythonImg, thumbBg:'thumb-purple', badgeClass:'badge-purple' },
-  { id:6, title:'Generative AI 실전',   category:'기타',     instructor:'한담당관', price:'₩75,000', thumbSrc: genaiImg,  thumbBg:'thumb-pink',   badgeClass:'badge-pink'   },
+  { id:1, title:'신선식품 새벽 공동배송', category:'신선식품', instructor:'서울 성동구', price:'분담금 ₩12,000', thumbSrc: springImg, thumbBg:'thumb-teal',   badgeClass:'badge-teal'   },
+  { id:2, title:'생활잡화 묶음배송 프로그램', category:'생활잡화', instructor:'경기 수원시', price:'분담금 ₩9,000',  thumbSrc: vueImg,    thumbBg:'thumb-teal',   badgeClass:'badge-teal'   },
+  { id:3, title:'의류·잡화 지역 물류거점 공유', category:'의류·잡화', instructor:'대구 중구', price:'분담금 ₩15,000', thumbSrc: dockerImg, thumbBg:'thumb-blue',   badgeClass:'badge-blue'   },
+  { id:4, title:'가공식품 냉장 공동물류', category:'가공식품', instructor:'부산 해운대구', price:'분담금 ₩18,000', thumbSrc: pythonImg, thumbBg:'thumb-purple', badgeClass:'badge-purple' },
+  { id:5, title:'뷰티·헬스 소형화물 합배송', category:'뷰티·헬스', instructor:'인천 미추홀구', price:'분담금 ₩8,000',  thumbSrc: genaiImg,  thumbBg:'thumb-pink',   badgeClass:'badge-pink'   },
+  { id:6, title:'가전·전자 권역별 공동 라스트마일', category:'가전·전자', instructor:'광주 서구', price:'분담금 ₩21,000', thumbSrc: k8sImg,    thumbBg:'thumb-blue',   badgeClass:'badge-blue'   },
 ]
 
 const features = [
-  { icon:'🚀', title:'실무 중심 커리큘럼', desc:'현업 전문가가 직접 설계한 실무 중심 프로그램으로 빠르게 성장하세요.' },
-  { icon:'🎯', title:'맞춤 프로그램 추천', desc:'AI 기반 추천 시스템이 참여 이력을 분석해 딱 맞는 프로그램을 추천합니다.' },
-  { icon:'💳', title:'간편한 참여 신청', desc:'원클릭 정산과 즉시 참여로 학습을 바로 시작하세요.' },
-  { icon:'📱', title:'언제 어디서나', desc:'PC, 태블릿, 모바일 어디서든 끊김 없이 학습하세요.' },
+  { icon:'🚚', title:'배송비 분담', desc:'지역 소상공인이 물량을 모아 공동배송하면 건당 배송비 부담이 크게 줄어듭니다.' },
+  { icon:'🏛️', title:'지자체 지원금 반영', desc:'프로그램별 지자체 지원금이 정산에 자동 반영되어 실부담금만 냅니다.' },
+  { icon:'🎯', title:'맞춤 프로그램 추천', desc:'참여 이력을 분석해 우리 가게에 맞는 공동물류 프로그램을 추천합니다.' },
+  { icon:'📦', title:'신청 즉시 접수', desc:'원클릭 신청 후 정산이 완료되면 참여가 확정되고 물류 배차가 시작됩니다.' },
 ]
 </script>
 

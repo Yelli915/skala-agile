@@ -118,17 +118,17 @@
                   class="status-badge"
                   :class="course.status === 'ACTIVE' ? 'status-active' : 'status-inactive'"
                 >
-                  {{ course.status || 'UNKNOWN' }}
+                  {{ course.status === 'ACTIVE' ? '모집 중' : '모집 마감' }}
                 </span>
               </div>
 
               <div class="course-meta-grid">
                 <div class="meta-box">
-                  <div class="meta-label">카테고리</div>
-                  <div class="meta-value">{{ course.category || '-' }}</div>
+                  <div class="meta-label">상품군</div>
+                  <div class="meta-value">{{ courseStore.categoryMeta(course.category).label }}</div>
                 </div>
                 <div class="meta-box">
-                  <div class="meta-label">가격</div>
+                  <div class="meta-label">분담금 기준액</div>
                   <div class="meta-value">{{ formatPrice(course.price) }}</div>
                 </div>
                 <div class="meta-box">
@@ -172,9 +172,11 @@ import CourseCard from '@/components/CourseCard.vue'
 import { useAuthStore } from '@/store/auth.js'
 import { enrollmentApi } from '@/api/enrollment.js'
 import { courseApi } from '@/api/course.js'
+import { useCourseStore } from '@/store/course.js'
 
 const router = useRouter()
 const auth = useAuthStore()
+const courseStore = useCourseStore()
 
 const isInstructor = computed(() => auth.user?.role === 'INSTRUCTOR')
 
@@ -221,6 +223,13 @@ function getCourseInstructorId(course) {
   )
 }
 
+function buildRecommendMessage(basedOnCategory) {
+  if (basedOnCategory) {
+    return `${courseStore.categoryMeta(basedOnCategory).label} 상품군 참여 이력을 기반으로 추천한 공동물류 프로그램입니다.`
+  }
+  return '참여 소상공인에게 인기 있는 공동물류 프로그램입니다.'
+}
+
 async function loadStudentRecommendations() {
   try {
     if (!auth.user) {
@@ -242,18 +251,18 @@ async function loadStudentRecommendations() {
 
     if (Array.isArray(payload?.recommendedCourses)) {
       recommendations.value = payload.recommendedCourses
-      recommendMessage.value = payload.message ?? ''
     } else if (Array.isArray(payload?.data)) {
       recommendations.value = payload.data
-      recommendMessage.value = payload.message ?? ''
     } else if (Array.isArray(payload)) {
       recommendations.value = payload
-      recommendMessage.value = ''
     } else {
       console.warn('[MyPage] unexpected recommendation response shape:', payload)
       recommendations.value = []
-      recommendMessage.value = ''
     }
+
+    // recommend-service가 내려주는 message에는 "강의" 문구가 섞여 있어(수정 불가 대상),
+    // 프론트에서 공동물류 도메인 문구로 다시 만든다.
+    recommendMessage.value = buildRecommendMessage(payload?.basedOnCategory)
   } catch (error) {
     console.error('[MyPage] failed to load recommendations:', error)
     recommendError.value = '현재 추천 프로그램을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.'

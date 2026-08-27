@@ -123,8 +123,9 @@ const router = useRouter()
 const courseStore = useCourseStore()
 const auth = useAuthStore()
 
-const { categories, loading } = courseStore
+const { categories } = courseStore
 
+const loading = computed(() => courseStore.loading)
 const selectedCategory = computed(() => courseStore.selectedCategory)
 const isInstructor = computed(() => auth.user?.role === 'INSTRUCTOR')
 

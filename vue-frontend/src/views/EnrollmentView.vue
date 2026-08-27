@@ -37,22 +37,26 @@
       <main class="main-content">
         <h1 class="page-title">내 참여 목록</h1>
 
+        <p v-if="!loading && pollTimerActive" class="poll-hint">
+          정산 처리 결과를 확인하는 중입니다. 잠시 후 상태가 자동으로 갱신됩니다.
+        </p>
+
         <div v-if="loading" class="loading-center">
           <div class="spinner"></div>
         </div>
 
         <div v-else-if="enrollments.length" class="enrollment-list fade-in">
           <div v-for="item in enrollments" :key="item.id" class="enrollment-card">
-            <div class="enroll-thumb" :class="getThumbBg(item.course?.category)">
-              <img :src="getThumbSrc(item.course)" :alt="item.course?.title" />
+            <div class="enroll-thumb" :class="categoryMeta(item).bg">
+              <img v-if="categoryMeta(item).thumb" :src="categoryMeta(item).thumb" :alt="item.course?.title" />
             </div>
 
             <div class="enroll-info">
-              <span class="badge" :class="getBadge(item.course?.category)">
-                {{ item.course?.category }}
+              <span class="badge" :class="categoryMeta(item).badge">
+                {{ categoryMeta(item).label }}
               </span>
               <h3 class="enroll-title">{{ item.course?.title }}</h3>
-              <p class="enroll-instructor">지자체 담당자: {{ item.course?.instructorName }}</p>
+              <p class="enroll-instructor">운영 주체: {{ operatorName(item) }}</p>
             </div>
 
             <div class="enroll-status">
@@ -62,7 +66,7 @@
                   item.status === 'ACTIVE' ? 'status-active' : 'status-pending'
                 ]"
               >
-                {{ item.status === 'ACTIVE' ? '참여 중' : '대기 중' }}
+                {{ statusText(item.status) }}
               </span>
               <router-link :to="`/courses/${item.courseId}`" class="btn btn-ghost btn-sm">
                 프로그램 보기
@@ -84,44 +88,82 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import AppHeader from '@/components/AppHeader.vue'
 import { enrollmentApi } from '@/api/enrollment.js'
 import { useAuthStore } from '@/store/auth.js'
+import { useCourseStore } from '@/store/course.js'
 
 const router = useRouter()
 const auth = useAuthStore()
+const courseStore = useCourseStore()
 
 const enrollments = ref([])
 const loading = ref(true)
 
 const isInstructor = computed(() => auth.user?.role === 'INSTRUCTOR')
 
-const categoryConfig = {
-  '신선식품': { bg: 'thumb-teal', badge: 'badge-teal', thumb: 'spring_boot' },
-  '생활잡화': { bg: 'thumb-teal', badge: 'badge-teal', thumb: 'vue_js' },
-  '의류': { bg: 'thumb-blue', badge: 'badge-blue', thumb: 'kubernetes' },
-  '음식점': { bg: 'thumb-purple', badge: 'badge-purple', thumb: 'python' },
-  '기타': { bg: 'thumb-pink', badge: 'badge-pink', thumb: 'generative_ai' },
-}
+// PENDING → ACTIVE 전환은 payment.completed Kafka 이벤트로 비동기 처리되고 프론트로 푸시되지 않는다.
+// 백엔드 변경 없이, 대기 중인 신청이 있으면 기존 GET /api/enrollments/my 를 잠시 폴링해 상태를 갱신한다.
+const POLL_INTERVAL = 3000
+const POLL_MAX_TRIES = 10
+let pollTimer = null
+const pollTimerActive = ref(false)
 
-function getThumbBg(cat) {
-  return categoryConfig[cat]?.bg || 'thumb-gray'
-}
+const hasPendingEnrollment = computed(() =>
+  enrollments.value.some((item) => item.status !== 'ACTIVE')
+)
 
-function getBadge(cat) {
-  return categoryConfig[cat]?.badge || 'badge-gray'
-}
-
-function getThumbSrc(course) {
-  const key = course?.thumbnail || categoryConfig[course?.category]?.thumb
-  if (!key) return ''
-  try {
-    return new URL(`../assets/images/courses/${key}.png`, import.meta.url).href
-  } catch {
-    return ''
+function stopPolling() {
+  if (pollTimer) {
+    clearInterval(pollTimer)
+    pollTimer = null
   }
+  pollTimerActive.value = false
+}
+
+function assignEnrollments(data) {
+  if (Array.isArray(data?.data)) {
+    enrollments.value = data.data
+  } else if (Array.isArray(data)) {
+    enrollments.value = data
+  } else {
+    enrollments.value = []
+  }
+}
+
+function startPollingIfNeeded() {
+  if (pollTimer || !hasPendingEnrollment.value) return
+
+  pollTimerActive.value = true
+  let tries = 0
+  pollTimer = setInterval(async () => {
+    tries += 1
+    try {
+      const res = await enrollmentApi.getMyEnrollments()
+      assignEnrollments(res.data)
+    } catch (error) {
+      console.error('[EnrollmentView] polling failed:', error)
+    }
+    if (!hasPendingEnrollment.value || tries >= POLL_MAX_TRIES) {
+      stopPolling()
+    }
+  }, POLL_INTERVAL)
+}
+
+// item.course.category는 course-service가 준 원본 enum. store가 라벨/색상/썸네일로 해석한다.
+function categoryMeta(item) {
+  return courseStore.categoryMeta(item?.course?.category)
+}
+
+function operatorName(item) {
+  return item?.course?.instructorName || item?.course?.operatorName || '지자체 직접 운영'
+}
+
+// 백엔드 Enrollment 상태는 PENDING / ACTIVE 두 가지뿐 (payment.completed 이벤트로 전환).
+function statusText(status) {
+  return status === 'ACTIVE' ? '참여 확정' : '신청 접수 · 정산 대기'
 }
 
 function handleLogout() {
@@ -140,21 +182,18 @@ onMounted(async () => {
   try {
     const res = await enrollmentApi.getMyEnrollments()
     console.log('[EnrollmentView] my enrollments response:', res.data)
-
-    if (Array.isArray(res.data?.data)) {
-      enrollments.value = res.data.data
-    } else if (Array.isArray(res.data)) {
-      enrollments.value = res.data
-    } else {
-      enrollments.value = []
-    }
+    assignEnrollments(res.data)
   } catch (error) {
     console.error('[EnrollmentView] failed to load enrollments:', error)
     enrollments.value = []
   } finally {
     loading.value = false
   }
+
+  startPollingIfNeeded()
 })
+
+onUnmounted(stopPolling)
 </script>
 
 <style scoped>
@@ -235,6 +274,16 @@ onMounted(async () => {
   font-size: 22px;
   font-weight: 700;
   margin-bottom: 24px;
+}
+
+.poll-hint {
+  margin-top: -12px;
+  margin-bottom: 20px;
+  padding: 10px 14px;
+  border-radius: var(--radius-md);
+  background: #FAEEDA;
+  color: #854F0B;
+  font-size: 13px;
 }
 
 .enrollment-list {

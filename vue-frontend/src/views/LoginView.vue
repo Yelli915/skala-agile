@@ -9,7 +9,7 @@
         </div>
         <div class="brand-content">
           <h2>다시 만나서<br>반갑습니다</h2>
-          <p>로그인하고 나만의 학습 여정을 이어가세요.</p>
+          <p>로그인하고 우리 지역 공동물류 프로그램을 이어서 관리하세요.</p>
           <ul class="feature-list">
             <li v-for="f in features" :key="f">
               <span class="dot"></span>{{ f }}
@@ -90,7 +90,7 @@ const success = ref('')
 
 const registerForm = ref({ name: '', email: '', password: '', role: 'STUDENT' })
 
-const features = ['참여 중인 프로그램 이어보기', '맞춤 프로그램 추천', '수료증 관리']
+const features = ['참여 중인 공동물류 프로그램 관리', '맞춤 프로그램 추천', '정산·분담금 내역 확인']
 
 function handleOAuth() {
   auth.redirectToLogin()
