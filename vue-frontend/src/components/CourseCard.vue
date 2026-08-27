@@ -1,21 +1,21 @@
 <template>
   <router-link :to="`/courses/${course.id}`" class="course-card">
-    <!-- 썸네일 -->
-    <div class="card-thumb" :class="thumbBg">
-      <img v-if="thumbSrc" :src="thumbSrc" :alt="course.title" class="thumb-img" />
-      <div v-else class="thumb-placeholder">{{ course.category?.charAt(0) }}</div>
+    <!-- 썸네일: 배송유형 컬러 배경 + 라인 아이콘 -->
+    <div class="card-thumb" :class="meta.bg">
+      <CategoryIcon :category="course.category" class="thumb-icon" />
     </div>
 
     <!-- 내용 -->
     <div class="card-body">
-      <span class="badge" :class="badgeClass">{{ course.category }}</span>
+      <span class="badge" :class="meta.badge">{{ categoryLabel }}</span>
       <h3 class="card-title">{{ course.title }}</h3>
+      <p class="card-blurb">{{ meta.blurb }}</p>
       <div class="card-meta">
-        <span class="instructor">{{ course.instructorName }}</span>
-        <span class="price">₩{{ Number(course.price).toLocaleString() }}</span>
+        <span class="operator">{{ operatorName }}</span>
+        <span class="price">분담금 ₩{{ Number(course.price || 0).toLocaleString() }}</span>
       </div>
       <div class="card-footer">
-        <span class="enrolled">참여 소상공인 {{ course.enrollmentCount?.toLocaleString() }}명</span>
+        <span class="enrolled">현재 {{ Number(course.enrollmentCount || 0).toLocaleString() }}건 참여 신청</span>
       </div>
     </div>
   </router-link>
@@ -23,33 +23,23 @@
 
 <script setup>
 import { computed } from 'vue'
+import { useCourseStore } from '@/store/course.js'
+import CategoryIcon from '@/components/CategoryIcon.vue'
 
 const props = defineProps({
-  course: { type: Object, required: true }
+  course: { type: Object, required: true },
 })
 
-const categoryConfig = {
-  '신선식품':  { bg: 'thumb-teal',   badge: 'badge-teal',   thumb: 'spring_boot' },
-  '생활잡화':  { bg: 'thumb-teal',   badge: 'badge-teal',   thumb: 'vue_js' },
-  '의류':     { bg: 'thumb-blue',   badge: 'badge-blue',   thumb: 'docker' },
-  '음식점':   { bg: 'thumb-purple', badge: 'badge-purple', thumb: 'python' },
-  '기타':     { bg: 'thumb-pink',   badge: 'badge-pink',   thumb: 'generative_ai' },
-}
+const courseStore = useCourseStore()
 
-const config = computed(() => categoryConfig[props.course.category] || { bg: 'thumb-gray', badge: 'badge-gray' })
-const thumbBg = computed(() => config.value.bg)
-const badgeClass = computed(() => config.value.badge)
+// course.category는 목록(정규화된 라벨) / 추천·참여 응답(원본 enum) 어느 쪽이든 들어올 수 있다.
+const meta = computed(() => courseStore.categoryMeta(props.course.category))
+const categoryLabel = computed(() => meta.value.label)
 
-// 썸네일 이미지 동적 import
-const thumbSrc = computed(() => {
-  const key = props.course.thumbnail || config.value.thumb
-  if (!key) return null
-  try {
-    return new URL(`../assets/images/courses/${key}.png`, import.meta.url).href
-  } catch {
-    return null
-  }
-})
+// 백엔드 CourseResponse에는 운영 주체 이름 필드가 없다(instructorId만 존재).
+const operatorName = computed(
+  () => props.course.instructorName || props.course.operatorName || '지자체 직접 운영'
+)
 </script>
 
 <style scoped>
@@ -65,8 +55,7 @@ const thumbSrc = computed(() => {
 }
 .course-card:hover {
   transform: translateY(-3px);
-  box-shadow: var(--shadow-md);
-  border-color: var(--color-border-hover);
+  border-color: var(--color-primary);
 }
 .card-thumb {
   height: 120px;
@@ -75,22 +64,10 @@ const thumbSrc = computed(() => {
   justify-content: center;
   overflow: hidden;
 }
-.thumb-teal   { background: #E1F5EE; }
-.thumb-blue   { background: #E6F1FB; }
-.thumb-amber  { background: #FAEEDA; }
-.thumb-purple { background: #EEEDFE; }
-.thumb-pink   { background: #FBEAF0; }
-.thumb-gray   { background: #F1EFE8; }
-.thumb-img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  padding: 16px;
-}
-.thumb-placeholder {
-  font-size: 36px;
-  font-weight: 700;
-  color: var(--color-text-muted);
+/* .thumb-* 배경/아이콘 색은 global.css 에서 관리 */
+.thumb-icon {
+  width: 44px;
+  height: 44px;
 }
 .card-body {
   padding: 14px 16px;
@@ -105,12 +82,18 @@ const thumbSrc = computed(() => {
   color: var(--color-text-primary);
   line-height: 1.4;
 }
+.card-blurb {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  line-height: 1.4;
+}
 .card-meta {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  margin-top: auto;
 }
-.instructor {
+.operator {
   font-size: 12px;
   color: var(--color-text-secondary);
 }

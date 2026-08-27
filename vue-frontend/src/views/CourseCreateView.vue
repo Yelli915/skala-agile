@@ -1,55 +1,20 @@
 <template>
-  <div class="page-wrapper">
+  <div class="page-wrapper app-bg">
     <AppHeader />
 
     <div class="page-layout">
-      <!-- 사이드바 -->
-      <aside class="sidebar">
-        <div class="sidebar-section">
-          <div class="sidebar-label">메뉴</div>
-
-          <router-link
-            to="/courses"
-            class="sidebar-item"
-            :class="{ active: $route.path === '/courses' }"
-          >
-            <span class="si-icon">📚</span> 프로그램 목록
-          </router-link>
-
-          <router-link
-            to="/courses/new"
-            class="sidebar-item"
-            :class="{ active: $route.path === '/courses/new' }"
-          >
-            <span class="si-icon">✍️</span> 프로그램 등록
-          </router-link>
-
-          <router-link to="/mypage" class="sidebar-item">
-            <span class="si-icon">⭐</span> 마이페이지
-          </router-link>
-        </div>
-
-        <div class="sidebar-section">
-          <div class="sidebar-label">계정</div>
-          <router-link to="/mypage" class="sidebar-item">
-            <span class="si-icon">👤</span> 마이페이지
-          </router-link>
-          <button class="sidebar-item sidebar-btn" @click="handleLogout">
-            <span class="si-icon">🚪</span> 로그아웃
-          </button>
-        </div>
-      </aside>
+      <AppSidebar />
 
       <!-- 메인 -->
       <main class="main-content">
         <div class="content-header">
           <div>
-            <h1 class="page-title">프로그램 등록</h1>
-            <p class="page-subtitle">지자체 담당자 계정으로 새로운 프로그램을 등록합니다.</p>
+            <h1 class="page-title">공동물류 프로그램 등록</h1>
+            <p class="page-subtitle">지자체 담당자 계정으로 새로운 공동물류 프로그램을 개설합니다.</p>
           </div>
         </div>
 
-        <div class="form-card">
+        <div class="form-card surface-card">
           <form class="course-form" @submit.prevent="handleSubmit">
             <div class="form-group">
               <label class="form-label" for="title">프로그램명</label>
@@ -58,27 +23,30 @@
                 v-model.trim="form.title"
                 type="text"
                 class="form-input"
-                placeholder="예: Cloud Native App기반 Web Service 개발"
+                placeholder="예: 성동구 전통시장 공동배송 프로그램"
                 maxlength="100"
               />
             </div>
 
             <div class="form-group">
-              <label class="form-label" for="description">프로그램 설명</label>
+              <label class="form-label" for="description">지원 대상 · 배송 권역 · 지원 내용</label>
               <textarea
                 id="description"
                 v-model.trim="form.description"
                 class="form-textarea"
-                rows="6"
-                placeholder="프로그램 소개, 학습 목표, 대상 등을 입력해 주세요."
+                rows="7"
+                placeholder="- 지원 대상: 관내 등록 소상공인 (예: 전통시장 상인회 소속)&#10;- 배송 권역: 성동구 전역 + 인접 3개 동&#10;- 지자체 지원 내용: 건당 배송비의 30% 지원, 냉장 포장재 무상 제공&#10;- 모집 마감: 2026-09-30"
               ></textarea>
+              <p class="form-hint">
+                여기에 적은 내용은 프로그램 상세 화면 상단의 <strong>지원 대상 · 배송비 기준</strong> 영역에 그대로 노출됩니다.
+              </p>
             </div>
 
             <div class="form-row">
               <div class="form-group">
-                <label class="form-label" for="category">카테고리</label>
+                <label class="form-label" for="category">배송유형</label>
                 <select id="category" v-model="form.category" class="form-select">
-                  <option disabled value="">카테고리를 선택하세요</option>
+                  <option disabled value="">배송유형을 선택하세요</option>
                   <option
                     v-for="option in categoryOptions"
                     :key="option.value"
@@ -87,10 +55,11 @@
                     {{ option.label }}
                   </option>
                 </select>
+                <p v-if="selectedCategoryBlurb" class="form-hint">{{ selectedCategoryBlurb }}</p>
               </div>
 
               <div class="form-group">
-                <label class="form-label" for="price">가격</label>
+                <label class="form-label" for="price">참여 분담금 기준액 (원)</label>
                 <input
                   id="price"
                   v-model.number="form.price"
@@ -98,20 +67,21 @@
                   min="0"
                   step="1000"
                   class="form-input"
-                  placeholder="예: 50000"
+                  placeholder="예: 12000"
                 />
+                <p class="form-hint">지자체 지원금 적용 전 배송비 기준액입니다. 소상공인 실부담금은 정산 시 확정됩니다.</p>
               </div>
             </div>
 
-            <div v-if="validationError" class="error-box">
+            <div v-if="validationError" class="alert alert-error">
               {{ validationError }}
             </div>
 
-            <div v-if="submitError" class="error-box">
+            <div v-if="submitError" class="alert alert-error">
               {{ submitError }}
             </div>
 
-            <div v-if="submitSuccess" class="success-box">
+            <div v-if="submitSuccess" class="alert alert-success">
               {{ submitSuccess }}
             </div>
 
@@ -133,14 +103,17 @@
 </template>
 
 <script setup>
-import { reactive, ref } from 'vue'
+import { computed, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import AppHeader from '@/components/AppHeader.vue'
+import AppSidebar from '@/components/AppSidebar.vue'
 import { courseApi } from '@/api/course.js'
 import { useAuthStore } from '@/store/auth.js'
+import { useCourseStore } from '@/store/course.js'
 
 const router = useRouter()
 const auth = useAuthStore()
+const courseStore = useCourseStore()
 
 const form = reactive({
   title: '',
@@ -154,17 +127,12 @@ const validationError = ref('')
 const submitError = ref('')
 const submitSuccess = ref('')
 
-const categoryOptions = [
-  { label: '신선식품', value: 'BACKEND' },
-  { label: '생활잡화', value: 'FRONTEND' },
-  { label: '의류', value: 'DEVOPS' },
-  { label: '음식점 · 기타', value: 'DATA_SCIENCE' }
-]
+// 백엔드 Course.Category enum 8종과 1:1로 매핑된 표시용 배송유형 (store가 단일 소스)
+const categoryOptions = courseStore.categoryOptions
 
-function handleLogout() {
-  auth.logout()
-  router.push('/')
-}
+const selectedCategoryBlurb = computed(() =>
+  form.category ? courseStore.categoryMeta(form.category).blurb : ''
+)
 
 function validateForm() {
   validationError.value = ''
@@ -180,23 +148,23 @@ function validateForm() {
   }
 
   if (!form.description) {
-    validationError.value = '프로그램 설명을 입력해 주세요.'
+    validationError.value = '지원 대상·배송 권역·지원 내용을 입력해 주세요.'
     return false
   }
 
   if (!form.category) {
-    validationError.value = '카테고리를 선택해 주세요.'
+    validationError.value = '배송유형을 선택해 주세요.'
     return false
   }
 
   if (form.price === null || form.price === undefined || form.price === '') {
-    validationError.value = '가격을 입력해 주세요.'
+    validationError.value = '참여 분담금 기준액을 입력해 주세요.'
     return false
   }
 
   const price = Number(form.price)
   if (Number.isNaN(price) || price < 0) {
-    validationError.value = '가격은 0 이상의 숫자로 입력해 주세요.'
+    validationError.value = '참여 분담금 기준액은 0 이상의 숫자로 입력해 주세요.'
     return false
   }
 
@@ -249,107 +217,10 @@ async function handleSubmit() {
 </script>
 
 <style scoped>
-.page-wrapper {
-  min-height: 100vh;
-  background: var(--color-bg-secondary);
-}
-
-.page-layout {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 32px 24px;
-  display: grid;
-  grid-template-columns: 220px 1fr;
-  gap: 28px;
-}
-
-/* 사이드바 */
-.sidebar {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.sidebar-section {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  margin-bottom: 8px;
-}
-
-.sidebar-label {
-  font-size: 10px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--color-text-muted);
-  padding: 8px 12px 4px;
-}
-
-.sidebar-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 9px 12px;
-  border-radius: var(--radius-md);
-  font-size: 14px;
-  color: var(--color-text-secondary);
-  transition: var(--transition);
-  background: none;
-  border: none;
-  width: 100%;
-  text-align: left;
-  cursor: pointer;
-  font-family: var(--font-sans);
-  text-decoration: none;
-}
-
-.sidebar-item:hover {
-  background: var(--color-bg-tertiary);
-  color: var(--color-text-primary);
-}
-
-.sidebar-item.active {
-  background: var(--color-primary-light);
-  color: var(--color-primary);
-  font-weight: 500;
-}
-
-.si-icon {
-  font-size: 15px;
-}
-
-.sidebar-btn {
-  color: var(--color-text-secondary);
-}
-
-/* 메인 */
-.main-content {
-  min-width: 0;
-}
-
-.content-header {
-  margin-bottom: 20px;
-}
-
-.page-title {
-  font-size: 22px;
-  font-weight: 700;
-  color: var(--color-text-primary);
-}
-
-.page-subtitle {
-  margin-top: 6px;
-  font-size: 13px;
-  color: var(--color-text-muted);
-}
+/* 레이아웃/제목/카드 표면/알림 배너는 global.css 공통 규칙 사용 */
 
 .form-card {
-  background: var(--color-bg-primary);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
   padding: 24px;
-  box-shadow: var(--shadow-sm);
 }
 
 .course-form {
@@ -369,23 +240,18 @@ async function handleSubmit() {
   flex-direction: column;
   gap: 8px;
 }
-
-.form-label {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--color-text-primary);
-}
+/* .form-label / .form-hint 는 global.css */
 
 .form-input,
 .form-textarea,
 .form-select {
   width: 100%;
-  border: 1px solid var(--color-border);
+  border: 1.5px solid var(--color-border);
   border-radius: var(--radius-md);
   background: var(--color-bg-primary);
   padding: 12px 14px;
   font-size: 14px;
-  font-family: inherit;
+  font-family: var(--font-sans);
   color: var(--color-text-primary);
   outline: none;
   transition: var(--transition);
@@ -396,29 +262,13 @@ async function handleSubmit() {
 .form-textarea:focus,
 .form-select:focus {
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.08);
+  box-shadow: 0 0 0 3px var(--color-primary-light);
 }
 
 .form-textarea {
   resize: vertical;
-  min-height: 140px;
-  line-height: 1.5;
-}
-
-.error-box {
-  background: #fef2f2;
-  color: #dc2626;
-  border-radius: var(--radius-md);
-  padding: 12px 14px;
-  font-size: 13px;
-}
-
-.success-box {
-  background: #ecfdf3;
-  color: #15803d;
-  border-radius: var(--radius-md);
-  padding: 12px 14px;
-  font-size: 13px;
+  min-height: 150px;
+  line-height: 1.6;
 }
 
 .form-actions {

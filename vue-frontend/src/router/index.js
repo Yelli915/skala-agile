@@ -19,10 +19,11 @@ const routes = [
     component: () => import('@/views/CallbackView.vue')
   },
   {
+    // 프로그램 목록/상세는 로그인 없이도 열람 가능(공개 카탈로그).
+    // 참여 신청 등 행위는 각 화면에서 로그인으로 유도한다.
     path: '/courses',
     name: 'CourseList',
-    component: () => import('@/views/CourseListView.vue'),
-    meta: { requiresAuth: true }
+    component: () => import('@/views/CourseListView.vue')
   },
   {
     path: '/courses/new',
@@ -33,14 +34,12 @@ const routes = [
   {
     path: '/courses/:id(\\d+)',
     name: 'CourseDetail',
-    component: () => import('@/views/CourseDetailView.vue'),
-    meta: { requiresAuth: true }
+    component: () => import('@/views/CourseDetailView.vue')
   },
   {
+    // 내 참여 현황은 마이페이지의 한 섹션으로 통합됨. 기존 링크 호환을 위해 리다이렉트만 유지.
     path: '/enrollments',
-    name: 'Enrollment',
-    component: () => import('@/views/EnrollmentView.vue'),
-    meta: { requiresAuth: true }
+    redirect: '/mypage'
   },
   {
     path: '/mypage',
@@ -53,7 +52,11 @@ const routes = [
 const router = createRouter({
   history: createWebHistory(),
   routes,
-  scrollBehavior() {
+  scrollBehavior(to) {
+    // 대시보드 섹션 앵커(#my-enrollments 등)로 이동할 때는 해당 섹션을 헤더 아래로 스크롤
+    if (to.hash) {
+      return { el: to.hash, top: 80, behavior: 'smooth' }
+    }
     return { top: 0 }
   }
 })

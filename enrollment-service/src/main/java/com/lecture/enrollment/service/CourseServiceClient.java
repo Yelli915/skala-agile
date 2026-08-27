@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.Map;
+import java.math.BigDecimal;
 
 @Slf4j
 @Component
@@ -46,7 +47,8 @@ public class CourseServiceClient {
                     .get()
                     .uri("http://course-service/api/courses/internal/{id}", courseId)
                     .retrieve()
-                    .bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {})
+                    .bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {
+                    })
                     .block();
 
             if (responseBody == null) {
@@ -61,16 +63,16 @@ public class CourseServiceClient {
              *
              * 1) 래퍼 응답
              * {
-             *   "success": true,
-             *   "message": "성공",
-             *   "data": { ...course fields... }
+             * "success": true,
+             * "message": "성공",
+             * "data": { ...course fields... }
              * }
              *
              * 2) 바로 강의 객체 반환
              * {
-             *   "id": 1,
-             *   "title": "...",
-             *   ...
+             * "id": 1,
+             * "title": "...",
+             * ...
              * }
              */
             Object data = responseBody.get("data");
@@ -86,6 +88,29 @@ public class CourseServiceClient {
                     courseId, e.getMessage());
             throw new RuntimeException("Course Service 강의 상세 조회 실패");
         }
+    }
+
+    /**
+     * 공동물류 프로그램의 최종 소상공인 부담금 조회 (수정)
+     */
+    public BigDecimal getCoursePrice(Long courseId) {
+        Map<String, Object> courseInfo = getCourse(courseId);
+
+        Object priceValue = courseInfo.get("price");
+
+        if (priceValue == null) {
+            throw new IllegalArgumentException(
+                    "프로그램 가격 정보가 없습니다: " + courseId);
+        }
+
+        BigDecimal price = new BigDecimal(priceValue.toString());
+
+        if (price.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException(
+                    "프로그램 가격은 0보다 커야 합니다: " + courseId);
+        }
+
+        return price;
     }
 
     /**

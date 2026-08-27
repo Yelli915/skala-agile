@@ -4,6 +4,7 @@ infra-images.tar
 # Node
 node_modules/
 vue-frontend/vue-frontend.zip
+vue-frontend/dist/
 
 # Gradle / Java build output
 .gradle/
