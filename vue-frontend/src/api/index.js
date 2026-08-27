@@ -15,17 +15,24 @@ api.interceptors.request.use((config) => {
   return config
 })
 
+// 401 처리를 건너뛰는 경로: 콜백은 스스로 에러를 처리하고,
+// 공개/로그인 페이지에서는 리다이렉트가 무의미하거나 루프를 만든다.
+const NO_REDIRECT_PATHS = ['/callback', '/login', '/admin', '/']
+
 api.interceptors.response.use(
   (res) => res,
   (err) => {
     if (err.response?.status === 401) {
-      console.error('[API] 401 Unauthorized')
-      console.error('[API] response data =', err.response?.data)
-      console.error('[API] request url =', err.config?.url)
-      // 디버깅 중에는 자동 로그아웃/리다이렉트 잠시 비활성화
-      // const auth = useAuthStore()
-      // auth.logout()
-      // window.location.href = '/login'
+      console.error('[API] 401 Unauthorized —', err.config?.url)
+
+      const auth = useAuthStore()
+      auth.logout(false)
+
+      const path = window.location.pathname
+      if (!NO_REDIRECT_PATHS.includes(path)) {
+        // 세션 만료 → 안내와 함께 로그인 화면으로
+        window.location.href = '/login?expired=1'
+      }
     }
     return Promise.reject(err)
   }

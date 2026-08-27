@@ -21,8 +21,13 @@
         <router-link to="/login" class="inline-link">일반 로그인</router-link>을 이용해 주세요.
       </p>
 
-      <button class="btn btn-primary btn-full" @click="handleAdminLogin">
-        관리자 계정으로 로그인
+      <button
+        class="btn btn-primary btn-full"
+        :disabled="redirecting"
+        @click="handleAdminLogin"
+      >
+        <span v-if="redirecting">인증 서버로 이동 중…</span>
+        <span v-else>관리자 계정으로 로그인</span>
       </button>
 
       <p class="switch">
@@ -34,7 +39,7 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { useAuthStore } from '@/store/auth.js'
 
@@ -42,9 +47,11 @@ const route = useRoute()
 const auth = useAuthStore()
 
 const denied = computed(() => route.query.denied === '1')
+const redirecting = ref(false)
 
 function handleAdminLogin() {
   // 'admin' 의도로 OAuth 시작 → 콜백에서 INSTRUCTOR role만 통과시킨다.
+  redirecting.value = true
   auth.redirectToLogin('admin')
 }
 </script>

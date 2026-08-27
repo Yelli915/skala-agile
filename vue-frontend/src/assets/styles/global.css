@@ -114,6 +114,13 @@ img {
   transform: translateY(-1px);
   box-shadow: var(--shadow-md);
 }
+.btn:disabled,
+.btn[disabled] {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
 .btn-outline {
   background: transparent;
   color: var(--color-primary);

@@ -52,6 +52,11 @@
         <!-- 로그인 -->
         <section v-if="mode === 'login'" class="panel" role="tabpanel">
           <h1 class="panel-title">로그인</h1>
+
+          <p v-if="sessionExpired" class="alert alert-warn">
+            로그인 세션이 만료되었습니다. 다시 로그인해 주세요.
+          </p>
+
           <p class="panel-desc">
             물류이음 계정으로 로그인합니다. 버튼을 누르면 인증 서버로 이동해
             안전하게 로그인한 뒤 다시 돌아옵니다.
@@ -181,10 +186,14 @@
 
 <script setup>
 import { computed, reactive, ref } from 'vue'
+import { useRoute } from 'vue-router'
 import { useAuthStore } from '@/store/auth.js'
 import { authApi } from '@/api/auth.js'
 
+const route = useRoute()
 const auth = useAuthStore()
+
+const sessionExpired = computed(() => route.query.expired === '1')
 
 const tabs = [
   { key: 'login', label: '로그인' },
@@ -417,11 +426,6 @@ async function handleRegister() {
   font-size: 15px;
   justify-content: center;
 }
-.btn-primary:disabled {
-  opacity: 0.65;
-  cursor: not-allowed;
-  transform: none;
-}
 
 .switch-hint {
   text-align: center;
@@ -552,6 +556,11 @@ async function handleRegister() {
   background: #fef2f2;
   border: 1px solid #fecaca;
   color: var(--color-danger);
+}
+.alert-warn {
+  background: var(--color-warning-light);
+  border: 1px solid #f0d9b0;
+  color: var(--color-warning);
 }
 
 .registered-box {
