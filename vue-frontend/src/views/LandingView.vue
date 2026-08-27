@@ -118,8 +118,8 @@
       </div>
     </section>
 
-    <!-- 인기 프로그램 -->
-    <section class="popular-section">
+    <!-- 인기 프로그램 (실제/예시 프로그램이 하나도 없으면 섹션 자체를 숨긴다) -->
+    <section v-if="featuredCourses.length" class="popular-section">
       <div class="section-inner">
         <div class="section-header">
           <div>
@@ -228,6 +228,7 @@ import AppFooter from '@/components/AppFooter.vue'
 import CategoryIcon from '@/components/CategoryIcon.vue'
 import { courseApi } from '@/api/course.js'
 import { useCourseStore, SAMPLE_PROGRAMS, SUBSIDY_RATE, netBurden } from '@/store/course.js'
+import { isMockEnabled } from '@/config/mock.js'
 import { useAuthStore } from '@/store/auth.js'
 
 const courseStore = useCourseStore()
@@ -315,11 +316,13 @@ const stats = [
 
 /* 인기 프로그램 목록.
    - 로그인 전이라도 course-service GET /api/courses 를 시도해 "실제 모집 중인 프로그램"을 보여준다.
-   - 조회 실패(게이트웨이 인증 등)하거나 결과가 비면 SAMPLE_PROGRAMS 를 "예시"로 표시한다.
    - 라벨/배지/썸네일/아이콘은 courseStore.categoryMeta 가 단일 소스(수동 동기화 제거).
-   - 분담금은 정가와 지자체 지원금 반영 실부담(netBurden)을 함께 노출한다. */
-const rawPrograms = ref(SAMPLE_PROGRAMS)
-const isSample = ref(true)
+   - 분담금은 정가와 지자체 지원금 반영 실부담(netBurden)을 함께 노출한다.
+   - 목업 스위치(VITE_ENABLE_MOCK)가 켜져 있을 때만 조회 실패/빈 결과에서 SAMPLE_PROGRAMS 를 "예시"로 폴백한다.
+     꺼져 있으면 실제 목록만 쓰고, 없으면 이 섹션 자체를 숨긴다. */
+const mockOn = isMockEnabled()
+const rawPrograms = ref(mockOn ? SAMPLE_PROGRAMS : [])
+const isSample = ref(mockOn)
 const subsidyPercent = Math.round(SUBSIDY_RATE * 100)
 
 const featuredCourses = computed(() =>
@@ -362,10 +365,18 @@ onMounted(async () => {
         (a, b) => (Number(b.enrollmentCount) || 0) - (Number(a.enrollmentCount) || 0)
       )
       isSample.value = false
+    } else if (!mockOn) {
+      rawPrograms.value = []
+      isSample.value = false
     }
   } catch (e) {
-    // 비로그인 상태에서 게이트웨이가 401을 주는 경우가 정상 경로 — 예시 목록으로 진행한다.
-    console.warn('[Landing] 실시간 프로그램 조회 실패 → 예시 목록 표시', e)
+    // 비로그인 상태에서 게이트웨이가 401을 주는 경우가 정상 경로.
+    // 목업이 켜져 있으면 예시 목록을 그대로 두고, 꺼져 있으면 빈 목록으로 둔다.
+    console.warn('[Landing] 실시간 프로그램 조회 실패', e)
+    if (!mockOn) {
+      rawPrograms.value = []
+      isSample.value = false
+    }
   }
 })
 
@@ -404,7 +415,7 @@ const regions = [
 
 /* 히어로 */
 .hero {
-  background: linear-gradient(135deg, #f0f7ff 0%, #e8f4fd 50%, #f0f9ff 100%);
+  background: var(--color-primary-light);
   border-bottom: 1px solid var(--color-border);
   padding: 72px 0 0;
 }
@@ -744,13 +755,14 @@ const regions = [
   transition: var(--transition);
 }
 
-/* 특징 — 파란 배경 섹션 */
+/* 특징 — 밝은 배경 섹션 (페이지 전체 톤과 일관되게) */
 .features-section {
   padding: 84px 0;
-  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+  background: var(--color-bg-primary);
+  border-top: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
 }
-.features-section .section-eyebrow.center { color: rgba(255, 255, 255, 0.7); }
-.features-section .section-title.center { color: #fff; margin-bottom: 44px; }
+.features-section .section-title.center { margin-bottom: 44px; }
 .features-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -758,15 +770,15 @@ const regions = [
 }
 .feature-card {
   padding: 28px 22px;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   text-align: center;
   transition: var(--transition);
 }
 .feature-card:hover {
-  background: rgba(255, 255, 255, 0.13);
-  border-color: rgba(255, 255, 255, 0.28);
+  border-color: var(--color-border-hover);
+  box-shadow: 0 6px 20px rgba(15, 23, 42, 0.06);
   transform: translateY(-2px);
 }
 .feature-icon {
@@ -777,12 +789,12 @@ const regions = [
   align-items: center;
   justify-content: center;
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.16);
-  color: #fff;
+  background: var(--color-primary-light);
+  color: var(--color-primary);
 }
 .feature-icon svg { width: 24px; height: 24px; }
-.feature-title { font-size: 15px; font-weight: 700; color: #fff; margin-bottom: 8px; }
-.feature-desc { font-size: 13px; color: rgba(255, 255, 255, 0.8); line-height: 1.6; }
+.feature-title { font-size: 15px; font-weight: 700; color: var(--color-text-primary); margin-bottom: 8px; }
+.feature-desc { font-size: 13px; color: var(--color-text-secondary); line-height: 1.6; }
 
 /* 참여 지자체 */
 .regions-section { padding: 64px 0; background: var(--color-bg-secondary); }

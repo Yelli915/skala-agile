@@ -414,8 +414,7 @@ watch(
 /* 레이아웃/스피너/알림 배너/스켈레톤은 global.css 공통 규칙 사용 */
 
 .detail-layout {
-  /* 짧던 히어로 배너 대신 상단만 은은하게 물들이고 본문은 앱 배경으로 이어지게 한다 */
-  background: linear-gradient(180deg, #eef5ff 0%, var(--color-bg-secondary) 320px);
+  background: var(--color-bg-secondary);
   padding: 24px 0 72px;
 }
 

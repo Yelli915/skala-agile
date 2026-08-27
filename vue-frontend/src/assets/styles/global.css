@@ -3,7 +3,8 @@
   --color-primary-dark: #00337D;
   --color-primary-light: #E7F0FD;
   --color-secondary: #0056D2;
-  --gradient-primary: linear-gradient(135deg, #0056D2 0%, #0047AB 55%, #00337D 100%);
+  /* 그라디언트 미사용 — 플랫 디자인. 토큰은 하위 호환을 위해 단색으로 유지 */
+  --gradient-primary: var(--color-primary);
   --color-text-primary: #1a1a2e;
   --color-text-secondary: #6b7280;
   --color-text-muted: #9ca3af;
@@ -107,18 +108,9 @@ img {
 .fade-in-up  { animation: fadeInUp  0.4s ease both; }
 .fade-in     { animation: fadeIn    0.3s ease both; }
 
-/*
- * 페이지 배경 — 아주 옅은 브랜드 틴트 그라디언트 + 미세한 도트 격자.
- * 콘텐츠 가독성을 해치지 않도록 명도 차이를 최소로 잡는다.
- */
+/* 페이지 배경 — 단색 (그라디언트/틴트 미사용) */
 .app-bg {
   background-color: var(--color-bg-secondary);
-  background-image:
-    radial-gradient(circle at 18% -10%, rgba(0, 86, 210, 0.06), transparent 42%),
-    radial-gradient(circle at 100% 0%, rgba(0, 71, 171, 0.05), transparent 38%),
-    radial-gradient(rgba(15, 23, 42, 0.045) 1px, transparent 1px);
-  background-size: auto, auto, 22px 22px;
-  background-attachment: fixed, fixed, fixed;
 }
 
 /* 공통 버튼 */
@@ -345,8 +337,8 @@ img {
   padding: 80px 0;
 }
 
-/* 스켈레톤 (목록/그리드 로딩) */
-@keyframes shimmer { to { background-position: -200% 0; } }
+/* 스켈레톤 (목록/그리드 로딩) — 단색 + 투명도 펄스 (그라디언트 미사용) */
+@keyframes shimmer { 0%, 100% { opacity: 1; } 50% { opacity: 0.45; } }
 .skeleton-card {
   background: var(--color-bg-primary);
   border: 1px solid var(--color-border);
@@ -355,9 +347,8 @@ img {
 }
 .skeleton-thumb {
   height: 120px;
-  background: linear-gradient(90deg, var(--color-bg-tertiary) 25%, var(--color-border) 50%, var(--color-bg-tertiary) 75%);
-  background-size: 200% 100%;
-  animation: shimmer 1.4s infinite;
+  background: var(--color-bg-tertiary);
+  animation: shimmer 1.4s ease-in-out infinite;
 }
 .skeleton-body {
   padding: 14px 16px;
@@ -368,9 +359,8 @@ img {
 .skeleton-line {
   height: 12px;
   border-radius: 6px;
-  background: linear-gradient(90deg, var(--color-bg-tertiary) 25%, var(--color-border) 50%, var(--color-bg-tertiary) 75%);
-  background-size: 200% 100%;
-  animation: shimmer 1.4s infinite;
+  background: var(--color-bg-tertiary);
+  animation: shimmer 1.4s ease-in-out infinite;
 }
 .skeleton-line.short  { width: 40%; }
 .skeleton-line.medium { width: 70%; }

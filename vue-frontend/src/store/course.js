@@ -71,15 +71,31 @@ const LABEL_TO_KEY = Object.fromEntries(
 )
 
 /**
- * 원본 enum('BACKEND') 또는 정규화된 라벨('신선식품') 어느 쪽이 들어와도
+ * enrollment-service 의 EnrollmentService.normalizeCategory() 는 응답 course.category 를
+ * 원본 enum 이 아니라 강의 마켓플레이스 한글 라벨로 바꿔서 내려준다
+ * (BACKEND→"백엔드", FRONTEND→"프론트엔드", DEVOPS→"DevOps", 그 외 5종은 원본 enum 유지).
+ * 따라서 `GET /api/enrollments/my` 응답을 그릴 때 이 한글 라벨도 enum 으로 되짚어야 한다.
+ * (course-service 직접 조회 응답은 항상 원본 enum 이라 이 매핑이 필요 없다.)
+ */
+const LEGACY_LABEL_TO_KEY = {
+  '백엔드': 'BACKEND',
+  '프론트엔드': 'FRONTEND',
+  'DevOps': 'DEVOPS',
+  '데이터': 'OTHER',
+  'AI': 'OTHER',
+}
+
+/**
+ * 원본 enum('BACKEND') 또는 정규화된 라벨('정기 묶음배송') 어느 쪽이 들어와도
  * 동일한 메타 정보를 돌려준다.
  * - store.fetchCourses를 거친 course 객체는 category가 라벨로 바뀌어 있고,
- * - enrollment / recommend 응답에 실려 오는 course는 원본 enum 그대로다.
+ * - recommend 응답의 course는 원본 enum,
+ * - enrollment(`/my`) 응답의 course는 enrollment-service가 덧씌운 강의 마켓 한글 라벨이다.
  */
 function resolveCategoryMeta(value) {
   if (!value) return FALLBACK_META
   if (CATEGORY_META[value]) return CATEGORY_META[value]
-  const key = LABEL_TO_KEY[value]
+  const key = LABEL_TO_KEY[value] || LEGACY_LABEL_TO_KEY[value]
   return key ? CATEGORY_META[key] : FALLBACK_META
 }
 

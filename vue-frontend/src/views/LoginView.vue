@@ -385,7 +385,7 @@ async function handleRegister() {
 .login-brand {
   position: relative;
   overflow: hidden;
-  background: linear-gradient(150deg, #0A2E63 0%, #123F82 52%, #1C56A2 100%);
+  background: #123F82;
   /* 브랜딩 문구를 좌측 가장자리에서 떼어 패널 안쪽(더 오른쪽)에 배치 */
   padding: 64px 64px 56px clamp(72px, 13vw, 176px);
   display: flex;

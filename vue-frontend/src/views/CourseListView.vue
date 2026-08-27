@@ -470,9 +470,9 @@ onUnmounted(() => {
   padding: 0 24px;
 }
 
-/* 히어로 배너 — LandingView .hero 와 동일한 그라디언트/여백 */
+/* 히어로 배너 — LandingView .hero 와 동일한 배경/여백 */
 .catalog-hero {
-  background: linear-gradient(135deg, #f0f7ff 0%, #e8f4fd 50%, #f0f9ff 100%);
+  background: var(--color-primary-light);
   border-bottom: 1px solid var(--color-border);
   padding: 56px 0;
 }
