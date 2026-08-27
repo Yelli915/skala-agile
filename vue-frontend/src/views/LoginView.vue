@@ -26,7 +26,7 @@
 
     <!-- 우측 폼 -->
     <main class="login-main">
-      <div class="login-card fade-in-up">
+      <div class="login-content fade-in-up">
         <router-link to="/" class="back-link">← 홈으로</router-link>
 
         <!-- 모바일 로고 -->
@@ -274,7 +274,8 @@ async function handleRegister() {
 .login-page {
   min-height: 100vh;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(440px, 600px);
+  /* 로그인/회원가입이 놓이는 우측 영역을 넓게 */
+  grid-template-columns: minmax(0, 1fr) clamp(560px, 46%, 820px);
 }
 
 /* ── 좌측 브랜딩 ── */
@@ -352,28 +353,23 @@ async function handleRegister() {
   color: rgba(255, 255, 255, 0.5);
 }
 
-/* ── 우측 폼 ── */
+/* ── 우측 폼 (카드 없이 영역에 직접) ── */
 .login-main {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 56px 40px;
-  background: var(--color-bg-secondary);
-}
-.login-card {
-  width: 100%;
-  max-width: 460px;
+  padding: 64px 80px;
   background: var(--color-bg-primary);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-lg);
-  padding: 44px 44px 40px;
+}
+.login-content {
+  width: 100%;
+  max-width: 480px;
 }
 .back-link {
   display: inline-block;
   font-size: 13px;
   color: var(--color-text-muted);
-  margin-bottom: 28px;
+  margin-bottom: 32px;
   transition: var(--transition);
 }
 .back-link:hover {
@@ -659,7 +655,7 @@ async function handleRegister() {
 }
 
 /* ── 반응형 ── */
-@media (max-width: 920px) {
+@media (max-width: 960px) {
   .login-page {
     grid-template-columns: 1fr;
   }
@@ -670,19 +666,16 @@ async function handleRegister() {
     display: flex;
   }
   .login-main {
-    padding: 40px 20px;
+    padding: 48px 32px;
   }
-  .login-card {
-    padding: 36px 32px 32px;
+  .login-content {
+    max-width: 460px;
   }
 }
 
-@media (max-width: 420px) {
-  .login-card {
-    padding: 28px 20px;
-    border: none;
-    box-shadow: none;
-    background: transparent;
+@media (max-width: 480px) {
+  .login-main {
+    padding: 32px 20px;
   }
   .role-grid {
     grid-template-columns: 1fr;
