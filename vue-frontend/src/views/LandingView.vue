@@ -6,7 +6,7 @@
     <section class="hero">
       <div class="hero-inner">
         <div class="hero-content fade-in-up">
-          <span class="hero-badge">MSA 기반 지역 공동물류 플랫폼 · 실습용 데모</span>
+          <span class="hero-badge">MSA 기반 지역 공동물류 플랫폼</span>
           <h1 class="hero-title">지역이 함께 나르면,<br>배송비는 내려갑니다</h1>
           <p class="hero-desc">지자체가 여는 공동물류 프로그램에 참여하고, 소상공인 배송비 부담을 함께 줄여보세요.</p>
           <div class="hero-actions">
@@ -86,21 +86,13 @@
     <!-- 푸터 -->
     <footer class="footer">
       <div class="footer-inner">
-        <div class="footer-col">
-          <div class="footer-logo">
-            <img src="@/assets/images/logo/main_logo.png" alt="물류이음" />
-            <span>물류이음</span>
-          </div>
-          <p class="footer-note">
-            본 서비스는 고려대학교 MSA 강의를 위한 교육용 데모입니다. 실제 물류·정산은 이루어지지 않습니다.
-          </p>
+        <div class="footer-logo">
+          <img src="@/assets/images/logo/main_logo.png" alt="물류이음" />
+          <span>물류이음</span>
         </div>
-        <div class="footer-col footer-contact">
-          <p>운영 문의: audit@korea.ac.kr</p>
-          <p>지도교수: Sungryel Lim Ph.D</p>
-        </div>
+        <p class="footer-tagline">지역이 함께 나르는 공동물류 플랫폼</p>
       </div>
-      <p class="footer-copy">© 2026 물류이음 (교육용 데모). All rights reserved.</p>
+      <p class="footer-copy">© 2026 물류이음. All rights reserved.</p>
     </footer>
   </div>
 </template>
@@ -325,12 +317,10 @@ const regions = [
   margin: 0 auto;
   padding: 0 24px;
   display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 32px;
+  align-items: center;
+  gap: 16px;
   flex-wrap: wrap;
 }
-.footer-col { display: flex; flex-direction: column; gap: 10px; max-width: 460px; }
 .footer-logo {
   display: flex;
   align-items: center;
@@ -340,8 +330,7 @@ const regions = [
   font-weight: 600;
 }
 .footer-logo img { width: 28px; height: 28px; border-radius: 6px; }
-.footer-note { font-size: 12.5px; color: rgba(255,255,255,0.55); line-height: 1.6; }
-.footer-contact p { font-size: 12.5px; color: rgba(255,255,255,0.6); }
+.footer-tagline { font-size: 12.5px; color: rgba(255,255,255,0.55); }
 .footer-copy {
   max-width: 1200px;
   margin: 24px auto 0;
