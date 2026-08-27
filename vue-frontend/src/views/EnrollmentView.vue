@@ -2,40 +2,10 @@
   <div class="page-wrapper">
     <AppHeader />
     <div class="page-layout">
-      <aside class="sidebar">
-        <div class="sidebar-section">
-          <div class="sidebar-label">메뉴</div>
-
-          <router-link to="/courses" class="sidebar-item">
-            <span class="si-icon">📚</span> 프로그램 목록
-          </router-link>
-
-          <router-link
-            v-if="!isInstructor"
-            to="/enrollments"
-            class="sidebar-item active"
-          >
-            <span class="si-icon">✅</span> 내 참여 목록
-          </router-link>
-
-          <router-link to="/mypage" class="sidebar-item">
-            <span class="si-icon">⭐</span> 마이페이지
-          </router-link>
-        </div>
-
-        <div class="sidebar-section">
-          <div class="sidebar-label">계정</div>
-          <router-link to="/mypage" class="sidebar-item">
-            <span class="si-icon">👤</span> 마이페이지
-          </router-link>
-          <button class="sidebar-item sidebar-btn" @click="handleLogout">
-            <span class="si-icon">🚪</span> 로그아웃
-          </button>
-        </div>
-      </aside>
+      <AppSidebar />
 
       <main class="main-content">
-        <h1 class="page-title">내 참여 목록</h1>
+        <h1 class="page-title">내 참여 현황</h1>
 
         <p v-if="!loading && pollTimerActive" class="poll-hint">
           정산 처리 결과를 확인하는 중입니다. 잠시 후 상태가 자동으로 갱신됩니다.
@@ -48,7 +18,7 @@
         <div v-else-if="enrollments.length" class="enrollment-list fade-in">
           <div v-for="item in enrollments" :key="item.id" class="enrollment-card">
             <div class="enroll-thumb" :class="categoryMeta(item).bg">
-              <img v-if="categoryMeta(item).thumb" :src="categoryMeta(item).thumb" :alt="item.course?.title" />
+              <span class="thumb-emoji" aria-hidden="true">{{ categoryMeta(item).emoji }}</span>
             </div>
 
             <div class="enroll-info">
@@ -56,7 +26,7 @@
                 {{ categoryMeta(item).label }}
               </span>
               <h3 class="enroll-title">{{ item.course?.title }}</h3>
-              <p class="enroll-instructor">운영 주체: {{ operatorName(item) }}</p>
+              <p class="enroll-operator">운영 주체: {{ operatorName(item) }}</p>
             </div>
 
             <div class="enroll-status">
@@ -76,8 +46,8 @@
         </div>
 
         <div v-else class="empty-state">
-          <p class="empty-icon">📭</p>
-          <p>참여 중인 프로그램이 없습니다.</p>
+          <p class="empty-icon" aria-hidden="true">📭</p>
+          <p>참여 중인 공동물류 프로그램이 없습니다.</p>
           <router-link to="/courses" class="btn btn-primary" style="margin-top:16px;">
             프로그램 둘러보기
           </router-link>
@@ -91,6 +61,7 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import AppHeader from '@/components/AppHeader.vue'
+import AppSidebar from '@/components/AppSidebar.vue'
 import { enrollmentApi } from '@/api/enrollment.js'
 import { useAuthStore } from '@/store/auth.js'
 import { useCourseStore } from '@/store/course.js'
@@ -152,7 +123,7 @@ function startPollingIfNeeded() {
   }, POLL_INTERVAL)
 }
 
-// item.course.category는 course-service가 준 원본 enum. store가 라벨/색상/썸네일로 해석한다.
+// item.course.category는 course-service가 준 원본 enum. store가 라벨/색상/이모지로 해석한다.
 function categoryMeta(item) {
   return courseStore.categoryMeta(item?.course?.category)
 }
@@ -166,13 +137,8 @@ function statusText(status) {
   return status === 'ACTIVE' ? '참여 확정' : '신청 접수 · 정산 대기'
 }
 
-function handleLogout() {
-  auth.logout()
-  router.push('/')
-}
-
 onMounted(async () => {
-  // 강사는 이 페이지 접근 불가 → 마이페이지로 이동
+  // 지자체 담당자는 이 페이지 접근 불가 → 마이페이지로 이동
   if (isInstructor.value) {
     console.warn('[EnrollmentView] instructor tried to access /enrollments, redirect to /mypage')
     router.replace('/mypage')
@@ -211,61 +177,6 @@ onUnmounted(stopPolling)
   gap: 28px;
 }
 
-.sidebar {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.sidebar-section {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  margin-bottom: 8px;
-}
-
-.sidebar-label {
-  font-size: 10px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--color-text-muted);
-  padding: 8px 12px 4px;
-}
-
-.sidebar-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 9px 12px;
-  border-radius: var(--radius-md);
-  font-size: 14px;
-  color: var(--color-text-secondary);
-  transition: var(--transition);
-  background: none;
-  border: none;
-  width: 100%;
-  text-align: left;
-  cursor: pointer;
-  font-family: var(--font-sans);
-  text-decoration: none;
-}
-
-.sidebar-item:hover {
-  background: var(--color-bg-tertiary);
-  color: var(--color-text-primary);
-}
-
-.sidebar-item.active {
-  background: var(--color-primary-light);
-  color: var(--color-primary);
-  font-weight: 500;
-}
-
-.si-icon {
-  font-size: 15px;
-}
-
 .main-content {
   min-width: 0;
 }
@@ -281,8 +192,8 @@ onUnmounted(stopPolling)
   margin-bottom: 20px;
   padding: 10px 14px;
   border-radius: var(--radius-md);
-  background: #FAEEDA;
-  color: #854F0B;
+  background: var(--color-warning-light);
+  color: var(--color-warning);
   font-size: 13px;
 }
 
@@ -318,32 +229,20 @@ onUnmounted(stopPolling)
   overflow: hidden;
 }
 
-.enroll-thumb img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  padding: 8px;
+.thumb-emoji {
+  font-size: 30px;
+  line-height: 1;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.08));
 }
 
-.thumb-teal {
-  background: #E1F5EE;
-}
-
-.thumb-blue {
-  background: #E6F1FB;
-}
-
-.thumb-purple {
-  background: #EEEDFE;
-}
-
-.thumb-pink {
-  background: #FBEAF0;
-}
-
-.thumb-gray {
-  background: #F1EFE8;
-}
+.thumb-teal   { background: #E1F5EE; }
+.thumb-blue   { background: #E6F1FB; }
+.thumb-cyan   { background: var(--color-cold-light); }
+.thumb-purple { background: #EEEDFE; }
+.thumb-pink   { background: #FBEAF0; }
+.thumb-amber  { background: #FAEEDA; }
+.thumb-slate  { background: #EAEEF3; }
+.thumb-gray   { background: #F1EFE8; }
 
 .enroll-info {
   flex: 1;
@@ -357,7 +256,7 @@ onUnmounted(stopPolling)
   font-weight: 600;
 }
 
-.enroll-instructor {
+.enroll-operator {
   font-size: 13px;
   color: var(--color-text-secondary);
 }
@@ -374,6 +273,7 @@ onUnmounted(stopPolling)
   border-radius: 20px;
   font-size: 12px;
   font-weight: 500;
+  white-space: nowrap;
 }
 
 .status-active {

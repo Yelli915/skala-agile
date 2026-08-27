@@ -8,6 +8,7 @@
           <!-- 좌측 상세 정보 -->
           <div class="detail-info fade-in-up">
             <span class="badge" :class="badgeClass">{{ displayCategory }}</span>
+            <p class="detail-category-blurb">{{ config.blurb }}</p>
             <h1 class="detail-title">{{ course.title }}</h1>
             <p class="detail-desc">
               {{ course.description || '지역 공동물류 프로그램입니다. 신청 후 정산이 완료되면 참여가 확정됩니다.' }}
@@ -19,10 +20,10 @@
             </div>
           </div>
 
-          <!-- 우측 결제/수강 카드 -->
+          <!-- 우측 정산/참여 카드 -->
           <div class="enroll-card fade-in">
             <div class="enroll-thumb" :class="thumbBg">
-              <img v-if="thumbSrc" :src="thumbSrc" :alt="course.title" />
+              <span class="thumb-emoji" aria-hidden="true">{{ config.emoji }}</span>
             </div>
 
             <div class="enroll-body">
@@ -120,11 +121,9 @@ const displayPrice = computed(() => {
   return Number.isNaN(value) ? '0' : value.toLocaleString()
 })
 
-const thumbSrc = computed(() => config.value.thumb)
-
 const buttonLabel = computed(() => {
   if (isInstructor.value) return '지자체 담당자 계정은 신청 불가'
-  if (enrollmentStatus.value === 'ACTIVE') return '내 참여 목록으로 이동'
+  if (enrollmentStatus.value === 'ACTIVE') return '내 참여 현황으로 이동'
   if (enrollmentStatus.value === 'PENDING') return '신청 완료 · 정산 처리 중'
   return '정산하고 참여하기'
 })
@@ -142,11 +141,11 @@ const helperText = computed(() => {
   }
 
   if (enrollmentStatus.value === 'ACTIVE') {
-    return '이미 참여 중인 프로그램입니다. 내 참여 목록에서 진행 상태를 확인할 수 있습니다.'
+    return '이미 참여 중인 프로그램입니다. 내 참여 현황에서 진행 상태를 확인할 수 있습니다.'
   }
 
   if (enrollmentStatus.value === 'PENDING') {
-    return '참여 신청이 접수되었습니다. 정산/처리 상태가 반영되면 내 참여 목록에서 확인할 수 있습니다.'
+    return '참여 신청이 접수되었습니다. 정산 상태가 반영되면 내 참여 현황에서 확인할 수 있습니다.'
   }
 
   return '정산을 진행하면 참여 신청이 함께 처리됩니다.'
@@ -294,6 +293,12 @@ watch(
   gap: 14px;
 }
 
+.detail-category-blurb {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  margin-top: -6px;
+}
+
 .detail-title {
   font-size: 30px;
   font-weight: 700;
@@ -329,18 +334,20 @@ watch(
   justify-content: center;
 }
 
-.enroll-thumb img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  padding: 20px;
+.thumb-emoji {
+  font-size: 56px;
+  line-height: 1;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.1));
 }
 
-.thumb-teal { background: #E1F5EE; }
-.thumb-blue { background: #E6F1FB; }
+.thumb-teal   { background: #E1F5EE; }
+.thumb-blue   { background: #E6F1FB; }
+.thumb-cyan   { background: var(--color-cold-light); }
 .thumb-purple { background: #EEEDFE; }
-.thumb-pink { background: #FBEAF0; }
-.thumb-gray { background: #F1EFE8; }
+.thumb-pink   { background: #FBEAF0; }
+.thumb-amber  { background: #FAEEDA; }
+.thumb-slate  { background: #EAEEF3; }
+.thumb-gray   { background: #F1EFE8; }
 
 .enroll-body {
   padding: 20px;
@@ -424,11 +431,6 @@ watch(
   border-top-color: var(--color-primary);
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
-}
-
-.badge-gray {
-  background: #f3f4f6;
-  color: #6b7280;
 }
 
 @keyframes spin {
