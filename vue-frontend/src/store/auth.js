@@ -52,7 +52,16 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   // OAuth2 Authorization Code Flow
-  function redirectToLogin() {
+  // intent: 'user'(소상공인 일반 로그인) | 'admin'(지자체 담당자·관리자 로그인)
+  // auth-server는 수정 불가라 role 구분을 서버에 넘길 수 없으므로, 로그인 의도를
+  // sessionStorage에 저장해 두고 콜백에서 실제 role과 대조해 접근을 판정한다.
+  function redirectToLogin(intent = 'user') {
+    try {
+      sessionStorage.setItem('login_intent', intent === 'admin' ? 'admin' : 'user')
+    } catch (e) {
+      console.warn('[AuthStore] login_intent 저장 실패:', e)
+    }
+
     const params = new URLSearchParams({
       response_type: 'code',
       client_id: import.meta.env.VITE_CLIENT_ID,

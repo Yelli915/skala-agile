@@ -14,6 +14,12 @@ const routes = [
     meta: { guestOnly: true }
   },
   {
+    path: '/admin',
+    name: 'AdminLogin',
+    component: () => import('@/views/AdminLoginView.vue'),
+    meta: { guestOnly: true }
+  },
+  {
     path: '/callback',
     name: 'Callback',
     component: () => import('@/views/CallbackView.vue')

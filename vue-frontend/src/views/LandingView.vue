@@ -11,7 +11,6 @@
           <p class="hero-desc">지자체가 여는 공동물류 프로그램에 참여하고, 소상공인 배송비 부담을 함께 줄여보세요.</p>
           <div class="hero-actions">
             <router-link to="/login" class="btn btn-primary btn-lg">소상공인 참여 신청</router-link>
-            <router-link to="/login" class="btn btn-outline btn-lg">지자체 담당자 로그인</router-link>
           </div>
           <div class="hero-stats">
             <div class="stat"><span class="stat-num">1,200+</span><span class="stat-label">공동물류 프로그램</span></div>
@@ -91,6 +90,7 @@
           <span>물류이음</span>
         </div>
         <p class="footer-tagline">지역이 함께 나르는 공동물류 플랫폼</p>
+        <router-link to="/admin" class="footer-admin-link">관리자 로그인 →</router-link>
       </div>
       <p class="footer-copy">© 2026 물류이음. All rights reserved.</p>
     </footer>
@@ -329,8 +329,15 @@ const regions = [
   font-size: 15px;
   font-weight: 600;
 }
-.footer-logo img { width: 28px; height: 28px; border-radius: 6px; }
+.footer-logo img { width: 28px; height: 28px; border-radius: 6px; object-fit: contain; }
 .footer-tagline { font-size: 12.5px; color: rgba(255,255,255,0.55); }
+.footer-admin-link {
+  margin-left: auto;
+  font-size: 12.5px;
+  color: rgba(255,255,255,0.55);
+  transition: var(--transition);
+}
+.footer-admin-link:hover { color: #fff; }
 .footer-copy {
   max-width: 1200px;
   margin: 24px auto 0;

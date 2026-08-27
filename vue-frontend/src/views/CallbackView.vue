@@ -27,31 +27,56 @@ onMounted(async () => {
   const error = route.query.error
   const errorDescription = route.query.error_description
 
+  // 로그인 의도(일반 / 관리자)는 redirect 전에 sessionStorage에 저장돼 있다.
+  let intent = 'user'
+  try {
+    intent = sessionStorage.getItem('login_intent') || 'user'
+    sessionStorage.removeItem('login_intent')
+  } catch (e) {
+    console.warn('login_intent 조회 실패:', e)
+  }
+  const loginPath = intent === 'admin' ? '/admin' : '/login'
+
   if (error) {
     console.error('OAuth callback error:', {
       error,
       errorDescription
     })
     message.value = '로그인에 실패했습니다. 다시 시도해주세요.'
-    router.replace('/login')
+    router.replace(loginPath)
     return
   }
 
   if (!code) {
     console.error('OAuth callback error: code 파라미터가 없습니다.')
     message.value = '잘못된 로그인 요청입니다.'
-    router.replace('/login')
+    router.replace(loginPath)
     return
   }
 
   try {
     await auth.handleCallback(code)
+
+    if (intent === 'admin') {
+      // 관리자 로그인 경로 → 지자체 담당자(INSTRUCTOR) 계정만 통과
+      if (auth.isInstructor) {
+        message.value = '관리자 로그인 완료! 이동 중입니다...'
+        router.replace('/mypage')
+      } else {
+        console.warn('[Callback] 관리자 로그인 시도했으나 지자체 담당자 계정이 아님')
+        auth.logout(false)
+        message.value = '관리자 계정이 아닙니다. 다시 시도해주세요.'
+        router.replace('/admin?denied=1')
+      }
+      return
+    }
+
     message.value = '로그인 완료! 이동 중입니다...'
     router.replace('/courses')
   } catch (err) {
     console.error('OAuth callback 처리 실패:', err)
     message.value = '로그인 처리에 실패했습니다.'
-    router.replace('/login')
+    router.replace(loginPath)
   }
 })
 </script>
