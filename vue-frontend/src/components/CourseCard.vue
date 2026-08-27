@@ -1,8 +1,8 @@
 <template>
   <router-link :to="`/courses/${course.id}`" class="course-card">
-    <!-- 썸네일: 배송유형 컬러 배경 + 이모지 -->
+    <!-- 썸네일: 배송유형 컬러 배경 + 라인 아이콘 -->
     <div class="card-thumb" :class="meta.bg">
-      <span class="thumb-emoji" aria-hidden="true">{{ meta.emoji }}</span>
+      <CategoryIcon :category="course.category" class="thumb-icon" />
     </div>
 
     <!-- 내용 -->
@@ -24,6 +24,7 @@
 <script setup>
 import { computed } from 'vue'
 import { useCourseStore } from '@/store/course.js'
+import CategoryIcon from '@/components/CategoryIcon.vue'
 
 const props = defineProps({
   course: { type: Object, required: true },
@@ -54,8 +55,7 @@ const operatorName = computed(
 }
 .course-card:hover {
   transform: translateY(-3px);
-  box-shadow: var(--shadow-md);
-  border-color: var(--color-border-hover);
+  border-color: var(--color-primary);
 }
 .card-thumb {
   height: 120px;
@@ -64,18 +64,10 @@ const operatorName = computed(
   justify-content: center;
   overflow: hidden;
 }
-.thumb-teal   { background: #E1F5EE; }
-.thumb-blue   { background: #E6F1FB; }
-.thumb-amber  { background: #FAEEDA; }
-.thumb-purple { background: #EEEDFE; }
-.thumb-pink   { background: #FBEAF0; }
-.thumb-cyan   { background: var(--color-cold-light); }
-.thumb-slate  { background: #EAEEF3; }
-.thumb-gray   { background: #F1EFE8; }
-.thumb-emoji {
-  font-size: 44px;
-  line-height: 1;
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.08));
+/* .thumb-* 배경/아이콘 색은 global.css 에서 관리 */
+.thumb-icon {
+  width: 44px;
+  height: 44px;
 }
 .card-body {
   padding: 14px 16px;

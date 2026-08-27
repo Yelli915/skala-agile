@@ -1,8 +1,9 @@
 :root {
-  --color-primary: #185FA5;
-  --color-primary-dark: #0C447C;
-  --color-primary-light: #E6F1FB;
-  --color-secondary: #378ADD;
+  --color-primary: #0047AB;
+  --color-primary-dark: #00337D;
+  --color-primary-light: #E7F0FD;
+  --color-secondary: #0056D2;
+  --gradient-primary: linear-gradient(135deg, #0056D2 0%, #0047AB 55%, #00337D 100%);
   --color-text-primary: #1a1a2e;
   --color-text-secondary: #6b7280;
   --color-text-muted: #9ca3af;
@@ -25,9 +26,10 @@
   --radius-md: 10px;
   --radius-lg: 14px;
   --radius-xl: 20px;
-  --shadow-sm: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
-  --shadow-md: 0 4px 16px rgba(0,0,0,0.08), 0 2px 6px rgba(0,0,0,0.04);
-  --shadow-lg: 0 10px 32px rgba(0,0,0,0.10), 0 4px 12px rgba(0,0,0,0.06);
+  /* 그림자 미사용 — 플랫 디자인. 토큰은 하위 호환을 위해 none 으로 유지 */
+  --shadow-sm: none;
+  --shadow-md: none;
+  --shadow-lg: none;
   --font-sans: 'Pretendard Variable', 'Pretendard', -apple-system, BlinkMacSystemFont,
     'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', system-ui, sans-serif;
   --transition: all 0.2s ease;
@@ -49,7 +51,13 @@ body {
   color: var(--color-text-primary);
   background: var(--color-bg-secondary);
   line-height: 1.6;
+  /* 저대비(보조/약한) 텍스트가 얇아 흐려 보이던 문제 보정 — 기본 굵기 400 → 600.
+     제목·라벨 등 명시적으로 font-weight 를 지정한 요소는 영향 없음 */
+  font-weight: 600;
   -webkit-font-smoothing: antialiased;
+  /* 한국어는 어절(띄어쓰기) 단위로만 줄바꿈 — 단어 중간에서 끊기는 것 방지 */
+  word-break: keep-all;
+  overflow-wrap: anywhere;
 }
 
 a {
@@ -62,6 +70,13 @@ button {
   font-family: var(--font-sans);
   border: none;
   outline: none;
+}
+
+/* 키보드 포커스 링 — 리셋에서 outline:none 처리한 뒤 공통으로 되살린다 */
+:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+  border-radius: 3px;
 }
 
 img {
@@ -92,6 +107,20 @@ img {
 .fade-in-up  { animation: fadeInUp  0.4s ease both; }
 .fade-in     { animation: fadeIn    0.3s ease both; }
 
+/*
+ * 페이지 배경 — 아주 옅은 브랜드 틴트 그라디언트 + 미세한 도트 격자.
+ * 콘텐츠 가독성을 해치지 않도록 명도 차이를 최소로 잡는다.
+ */
+.app-bg {
+  background-color: var(--color-bg-secondary);
+  background-image:
+    radial-gradient(circle at 18% -10%, rgba(0, 86, 210, 0.06), transparent 42%),
+    radial-gradient(circle at 100% 0%, rgba(0, 71, 171, 0.05), transparent 38%),
+    radial-gradient(rgba(15, 23, 42, 0.045) 1px, transparent 1px);
+  background-size: auto, auto, 22px 22px;
+  background-attachment: fixed, fixed, fixed;
+}
+
 /* 공통 버튼 */
 .btn {
   display: inline-flex;
@@ -100,19 +129,17 @@ img {
   padding: 10px 20px;
   border-radius: var(--radius-md);
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 600;
   transition: var(--transition);
 }
 .btn-primary {
-  background: var(--color-primary);
+  background: var(--gradient-primary);
   color: #fff;
-  border: 1.5px solid var(--color-primary);
+  border: 1.5px solid var(--color-primary-dark);
 }
 .btn-primary:hover {
-  background: var(--color-primary-dark);
-  border-color: var(--color-primary-dark);
+  filter: brightness(1.06);
   transform: translateY(-1px);
-  box-shadow: var(--shadow-md);
 }
 .btn:disabled,
 .btn[disabled] {
@@ -142,10 +169,14 @@ img {
 /* 배지 */
 .badge {
   display: inline-block;
+  /* flex/grid 컨테이너 안에서 가로로 늘어나 로딩바처럼 보이는 것 방지 */
+  align-self: flex-start;
+  width: fit-content;
+  max-width: 100%;
   padding: 3px 10px;
   border-radius: 20px;
   font-size: 11px;
-  font-weight: 500;
+  font-weight: 600;
 }
 .badge-blue   { background: #E6F1FB; color: #185FA5; }
 .badge-teal   { background: #E1F5EE; color: #0F6E56; }
@@ -157,5 +188,218 @@ img {
 .badge-slate  { background: #EAEEF3; color: #44566B; }
 .badge-green  { background: var(--color-support-light); color: var(--color-support); }
 
+/*
+ * 배송유형 썸네일 — 배경 틴트 + 라인 아이콘 색을 한 쌍으로 관리한다.
+ * (예전에는 각 뷰의 <style scoped>에 배경색만 중복 정의돼 있었다. 이제 여기서만.)
+ * 배경은 이전보다 살짝 진하게 잡아 카드가 바래 보이지 않도록.
+ */
+.thumb-teal   { background: #D4EFE4; color: #0F6E56; }
+.thumb-blue   { background: #DBEAFB; color: #185FA5; }
+.thumb-amber  { background: #F6E3C4; color: #854F0B; }
+.thumb-purple { background: #E3E1FB; color: #534AB7; }
+.thumb-pink   { background: #F6DBE5; color: #993556; }
+.thumb-cyan   { background: #D2ECF3; color: #0E7C99; }
+.thumb-slate  { background: #DDE4EC; color: #44566B; }
+.thumb-gray   { background: #EAE6DC; color: #5F5E5A; }
+
+/* 배송유형 라인 아이콘 (CategoryIcon.vue) — 크기는 사용처에서 지정 */
+.category-icon {
+  width: 2.75rem;
+  height: 2.75rem;
+  color: inherit;
+  flex-shrink: 0;
+}
+
 /* 도메인 공통: 금액에서 덜어낸 지자체 지원금 등을 초록으로 */
 .amount-support { color: var(--color-support); font-weight: 700; }
+
+/* ══════════════════════════════════════════════════════════════
+   로그인 후 화면 공통 레이아웃 / 프리미티브
+   (예전에는 각 뷰의 <style scoped>에 거의 같은 규칙이 중복돼 있었다.
+    이제 여기가 단일 소스 — 뷰에서는 도메인 고유 스타일만 정의한다.)
+   ══════════════════════════════════════════════════════════════ */
+
+/* 페이지 골격: AppHeader + (AppSidebar 240px | 본문) */
+.page-wrapper {
+  min-height: 100vh;
+}
+.page-layout {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px 24px;
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  gap: 32px;
+}
+.main-content {
+  min-width: 0;
+}
+@media (max-width: 992px) {
+  .page-layout {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+}
+
+/* 페이지 제목 — 모든 본문 상단에서 동일한 크기/두께 */
+.page-title {
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--color-text-primary);
+}
+.page-subtitle {
+  margin-top: 8px;
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  max-width: 560px;
+  line-height: 1.65;
+}
+/* 본문 상단 제목줄 + 우측 액션 버튼 */
+.content-header {
+  margin-bottom: 28px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+/* 공통 카드 표면 (프로필/요약/폼 카드 등) */
+.surface-card {
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+}
+
+/* 섹션 제목 (본문 안의 하위 섹션) */
+.section-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  letter-spacing: -0.01em;
+}
+.section-subtitle {
+  font-size: 13px;
+  color: var(--color-text-muted);
+  line-height: 1.5;
+}
+
+/* 버튼 크기 변형 */
+.btn-sm   { padding: 7px 16px; font-size: 13px; }
+.btn-lg   { padding: 12px 26px; font-size: 15px; }
+.btn-full { width: 100%; justify-content: center; }
+
+/* 상태 배지 — 참여/정산/모집 상태를 한 벌로 통일 */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  width: fit-content;
+  white-space: nowrap;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+}
+.status-active   { background: var(--color-support-light); color: var(--color-support); }
+.status-pending  { background: var(--color-warning-light);  color: var(--color-warning); }
+.status-inactive { background: var(--color-bg-tertiary);    color: var(--color-text-secondary); }
+
+/* 알림 배너 — 에러/경고/성공/안내 (LoginView 의 .alert 와 동일 규격) */
+.alert {
+  padding: 11px 14px;
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  line-height: 1.6;
+}
+.alert-error   { background: #fef2f2; border: 1px solid #fecaca; color: var(--color-danger); }
+.alert-warn    { background: var(--color-warning-light); border: 1px solid #f0d9b0; color: var(--color-warning); }
+.alert-success { background: var(--color-support-light); border: 1px solid #b8e6c6; color: var(--color-support); }
+.alert-info    { background: var(--color-primary-light);  border: 1px solid #c7ddf7; color: var(--color-primary-dark); }
+
+/* 폼 라벨/도움말 (뷰별 입력 컴포넌트가 공유) */
+.form-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+.form-hint {
+  font-size: 12px;
+  color: var(--color-text-muted);
+  line-height: 1.5;
+}
+
+/* 로딩 스피너 */
+@keyframes spin { to { transform: rotate(360deg); } }
+.spinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid var(--color-border);
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+.loading-center {
+  display: flex;
+  justify-content: center;
+  padding: 80px 0;
+}
+
+/* 스켈레톤 (목록/그리드 로딩) */
+@keyframes shimmer { to { background-position: -200% 0; } }
+.skeleton-card {
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+.skeleton-thumb {
+  height: 120px;
+  background: linear-gradient(90deg, var(--color-bg-tertiary) 25%, var(--color-border) 50%, var(--color-bg-tertiary) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
+}
+.skeleton-body {
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.skeleton-line {
+  height: 12px;
+  border-radius: 6px;
+  background: linear-gradient(90deg, var(--color-bg-tertiary) 25%, var(--color-border) 50%, var(--color-bg-tertiary) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
+}
+.skeleton-line.short  { width: 40%; }
+.skeleton-line.medium { width: 70%; }
+
+/* 빈 상태 — 카드 표면 + 액션 */
+.empty-state {
+  text-align: center;
+  padding: 64px 24px 72px;
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+}
+.empty-state .empty-title {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+.empty-state .empty-desc {
+  margin-top: 8px;
+  font-size: 14px;
+  color: var(--color-text-secondary);
+}
+.empty-actions {
+  margin-top: 24px;
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.empty-actions .btn {
+  text-decoration: none;
+}

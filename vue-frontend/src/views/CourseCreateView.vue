@@ -1,5 +1,5 @@
 <template>
-  <div class="page-wrapper">
+  <div class="page-wrapper app-bg">
     <AppHeader />
 
     <div class="page-layout">
@@ -14,7 +14,7 @@
           </div>
         </div>
 
-        <div class="form-card">
+        <div class="form-card surface-card">
           <form class="course-form" @submit.prevent="handleSubmit">
             <div class="form-group">
               <label class="form-label" for="title">프로그램명</label>
@@ -23,7 +23,7 @@
                 v-model.trim="form.title"
                 type="text"
                 class="form-input"
-                placeholder="예: 성동구 신선식품 새벽 공동배송 프로그램"
+                placeholder="예: 성동구 전통시장 공동배송 프로그램"
                 maxlength="100"
               />
             </div>
@@ -73,15 +73,15 @@
               </div>
             </div>
 
-            <div v-if="validationError" class="error-box">
+            <div v-if="validationError" class="alert alert-error">
               {{ validationError }}
             </div>
 
-            <div v-if="submitError" class="error-box">
+            <div v-if="submitError" class="alert alert-error">
               {{ submitError }}
             </div>
 
-            <div v-if="submitSuccess" class="success-box">
+            <div v-if="submitSuccess" class="alert alert-success">
               {{ submitSuccess }}
             </div>
 
@@ -217,46 +217,10 @@ async function handleSubmit() {
 </script>
 
 <style scoped>
-.page-wrapper {
-  min-height: 100vh;
-  background: var(--color-bg-secondary);
-}
-
-.page-layout {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 32px 24px;
-  display: grid;
-  grid-template-columns: 220px 1fr;
-  gap: 28px;
-}
-
-.main-content {
-  min-width: 0;
-}
-
-.content-header {
-  margin-bottom: 20px;
-}
-
-.page-title {
-  font-size: 22px;
-  font-weight: 700;
-  color: var(--color-text-primary);
-}
-
-.page-subtitle {
-  margin-top: 6px;
-  font-size: 13px;
-  color: var(--color-text-muted);
-}
+/* 레이아웃/제목/카드 표면/알림 배너는 global.css 공통 규칙 사용 */
 
 .form-card {
-  background: var(--color-bg-primary);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
   padding: 24px;
-  box-shadow: var(--shadow-sm);
 }
 
 .course-form {
@@ -276,29 +240,18 @@ async function handleSubmit() {
   flex-direction: column;
   gap: 8px;
 }
-
-.form-label {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--color-text-primary);
-}
-
-.form-hint {
-  font-size: 12px;
-  color: var(--color-text-muted);
-  line-height: 1.5;
-}
+/* .form-label / .form-hint 는 global.css */
 
 .form-input,
 .form-textarea,
 .form-select {
   width: 100%;
-  border: 1px solid var(--color-border);
+  border: 1.5px solid var(--color-border);
   border-radius: var(--radius-md);
   background: var(--color-bg-primary);
   padding: 12px 14px;
   font-size: 14px;
-  font-family: inherit;
+  font-family: var(--font-sans);
   color: var(--color-text-primary);
   outline: none;
   transition: var(--transition);
@@ -316,22 +269,6 @@ async function handleSubmit() {
   resize: vertical;
   min-height: 150px;
   line-height: 1.6;
-}
-
-.error-box {
-  background: #fef2f2;
-  color: #dc2626;
-  border-radius: var(--radius-md);
-  padding: 12px 14px;
-  font-size: 13px;
-}
-
-.success-box {
-  background: var(--color-support-light);
-  color: var(--color-support);
-  border-radius: var(--radius-md);
-  padding: 12px 14px;
-  font-size: 13px;
 }
 
 .form-actions {

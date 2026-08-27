@@ -57,7 +57,17 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  // OAuth2 Authorization Code Flow
+  /**
+   * 아이디(이메일)/비밀번호로 로그인한다.
+   * auth-server 폼 로그인으로 Authorization Code를 받아 토큰 교환까지 진행.
+   * 실패 사유는 err.stage 로 구분: 'credentials'(자격증명 오류) | 'token' | 'profile' | undefined(네트워크 등)
+   */
+  async function loginWithPassword(username, password) {
+    const code = await authApi.passwordLogin({ username, password })
+    await handleCallback(code)
+  }
+
+  // OAuth2 Authorization Code Flow — 인증 서버 로그인 페이지로 전체 페이지 리다이렉트(폼 로그인 실패 시 폴백)
   function redirectToLogin() {
     const params = new URLSearchParams({
       response_type: 'code',
@@ -110,6 +120,7 @@ export const useAuthStore = defineStore('auth', () => {
     setUser,
     fetchUser,
     logout,
+    loginWithPassword,
     redirectToLogin,
     handleCallback
   }

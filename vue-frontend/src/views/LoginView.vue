@@ -22,6 +22,8 @@
       </div>
 
       <p class="brand-foot">© 2026 물류이음</p>
+
+      <KoreaNetworkArt class="brand-art" aria-hidden="true" />
     </aside>
 
     <!-- 우측 폼 -->
@@ -54,8 +56,7 @@
           <header class="panel-head">
             <h1 class="panel-title">로그인</h1>
             <p class="panel-desc">
-              물류이음 계정으로 로그인합니다. 버튼을 누르면 인증 서버로 이동해
-              안전하게 로그인한 뒤 다시 돌아옵니다.
+              가입한 이메일과 비밀번호를 입력해 로그인합니다.
             </p>
           </header>
 
@@ -63,14 +64,57 @@
             로그인 세션이 만료되었습니다. 다시 로그인해 주세요.
           </p>
 
-          <button
-            class="btn btn-primary btn-cta"
-            :disabled="redirecting"
-            @click="handleOAuth"
-          >
-            <span v-if="redirecting">인증 서버로 이동 중…</span>
-            <span v-else>물류이음 계정으로 로그인 <span class="cta-arrow" aria-hidden="true">→</span></span>
-          </button>
+          <form class="form" @submit.prevent="handleLogin" novalidate>
+            <div class="field">
+              <label class="field-label" for="login-username">아이디 (이메일)</label>
+              <input
+                id="login-username"
+                v-model.trim="loginForm.username"
+                type="email"
+                class="field-input"
+                placeholder="user@example.com"
+                autocomplete="username"
+                required
+              />
+            </div>
+
+            <div class="field">
+              <label class="field-label" for="login-password">비밀번호</label>
+              <div class="password-wrap">
+                <input
+                  id="login-password"
+                  v-model="loginForm.password"
+                  :type="showLoginPassword ? 'text' : 'password'"
+                  class="field-input"
+                  placeholder="비밀번호"
+                  autocomplete="current-password"
+                  required
+                />
+                <button
+                  type="button"
+                  class="password-toggle"
+                  :aria-label="showLoginPassword ? '비밀번호 숨기기' : '비밀번호 표시'"
+                  @click="showLoginPassword = !showLoginPassword"
+                >
+                  <svg v-if="showLoginPassword" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
+                    <line x1="1" y1="1" x2="23" y2="23" />
+                  </svg>
+                  <svg v-else viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                    <circle cx="12" cy="12" r="3" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <div v-if="loginError" class="alert alert-error">{{ loginError }}</div>
+
+            <button type="submit" class="btn btn-primary btn-cta" :disabled="loggingIn">
+              <span v-if="loggingIn">로그인 중…</span>
+              <span v-else>로그인</span>
+            </button>
+          </form>
 
           <p class="switch-hint">
             아직 계정이 없으신가요?
@@ -83,7 +127,7 @@
           <header class="panel-head">
             <h1 class="panel-title">회원가입</h1>
             <p class="panel-desc">
-              가입 후 <strong>로그인 탭</strong>에서 인증 서버를 통해 로그인하면
+              가입 후 <strong>로그인 탭</strong>에서 로그인하면
               이용을 시작할 수 있습니다.
             </p>
           </header>
@@ -198,28 +242,65 @@
 
 <script setup>
 import { computed, reactive, ref } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/store/auth.js'
 import { authApi } from '@/api/auth.js'
+import KoreaNetworkArt from '@/components/KoreaNetworkArt.vue'
 
 const route = useRoute()
+const router = useRouter()
 const auth = useAuthStore()
 
 const sessionExpired = computed(() => route.query.expired === '1')
+
+/* 로그인 후 돌아갈 목적지.
+   랜딩의 프로그램 카드/‘전체 보기’가 ?redirect=/courses/123 형태로 넘겨준다.
+   OAuth(전체 페이지 리다이렉트) 흐름에서도 살아남도록 세션에 보관하고,
+   CallbackView 가 같은 키를 읽어 이동한다. 오픈 리다이렉트 방지를 위해 same-origin 경로만 허용. */
+function safeInternalPath(value) {
+  return typeof value === 'string' &&
+    value.startsWith('/') &&
+    !value.startsWith('//') &&
+    !value.startsWith('/login') &&
+    !value.startsWith('/callback')
+    ? value
+    : ''
+}
+const REDIRECT_KEY = 'post_login_redirect'
+const initialRedirect = safeInternalPath(route.query.redirect)
+if (initialRedirect) {
+  sessionStorage.setItem(REDIRECT_KEY, initialRedirect)
+}
+function consumePostLoginRedirect() {
+  const stored = safeInternalPath(sessionStorage.getItem(REDIRECT_KEY))
+  sessionStorage.removeItem(REDIRECT_KEY)
+  return stored || '/courses'
+}
 
 const tabs = [
   { key: 'login', label: '로그인' },
   { key: 'register', label: '회원가입' },
 ]
-const mode = ref('login')
+// 랜딩 히어로의 타깃별 CTA가 ?tab=register&role=INSTRUCTOR 형태로 넘겨준다.
+const mode = ref(route.query.tab === 'register' ? 'register' : 'login')
 
-const redirecting = ref(false)
 const loading = ref(false)
 const error = ref('')
 const registered = ref(false)
 const showPassword = ref(false)
 
-const registerForm = reactive({ name: '', email: '', password: '', role: 'STUDENT' })
+/* 로그인(아이디/비밀번호) */
+const loginForm = reactive({ username: '', password: '' })
+const loggingIn = ref(false)
+const loginError = ref('')
+const showLoginPassword = ref(false)
+
+const registerForm = reactive({
+  name: '',
+  email: '',
+  password: '',
+  role: route.query.role === 'INSTRUCTOR' ? 'INSTRUCTOR' : 'STUDENT',
+})
 const touched = reactive({ name: false, email: false, password: false })
 
 const brandPoints = [
@@ -242,11 +323,33 @@ const formValid = computed(() => validName.value && validEmail.value && validPas
 function switchMode(next) {
   mode.value = next
   error.value = ''
+  loginError.value = ''
 }
 
-function handleOAuth() {
-  redirecting.value = true
-  auth.redirectToLogin()
+async function handleLogin() {
+  loginError.value = ''
+
+  if (!loginForm.username || !loginForm.password) {
+    loginError.value = '이메일과 비밀번호를 입력해 주세요.'
+    return
+  }
+
+  loggingIn.value = true
+  try {
+    await auth.loginWithPassword(loginForm.username, loginForm.password)
+    router.replace(consumePostLoginRedirect())
+  } catch (e) {
+    console.error('[Login] 로그인 실패:', e)
+    if (e?.stage === 'credentials') {
+      loginError.value = '아이디 또는 비밀번호가 올바르지 않습니다.'
+    } else if (e?.stage === 'profile') {
+      loginError.value = '로그인은 되었으나 사용자 정보를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.'
+    } else {
+      loginError.value = '로그인 중 문제가 발생했습니다. 잠시 후 다시 시도해 주세요.'
+    }
+  } finally {
+    loggingIn.value = false
+  }
 }
 
 async function handleRegister() {
@@ -280,13 +383,34 @@ async function handleRegister() {
 
 /* ── 좌측 브랜딩 ── */
 .login-brand {
-  background: linear-gradient(158deg, #0C447C 0%, #185FA5 50%, #2E86C7 100%);
-  padding: 64px 72px;
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(150deg, #0A2E63 0%, #123F82 52%, #1C56A2 100%);
+  /* 브랜딩 문구를 좌측 가장자리에서 떼어 패널 안쪽(더 오른쪽)에 배치 */
+  padding: 64px 64px 56px clamp(72px, 13vw, 176px);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   gap: 56px;
   color: #fff;
+}
+
+/* 브랜딩 문구는 항상 배경 일러스트 위에 */
+.brand,
+.brand-body,
+.brand-foot {
+  position: relative;
+  z-index: 1;
+}
+
+/* 전국 공동물류 네트워크 — 패널 전체를 덮는 배경 일러스트 */
+.brand-art {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
 }
 .brand {
   display: flex;
@@ -356,10 +480,13 @@ async function handleRegister() {
 /* ── 우측 폼 (카드 없이 영역에 직접) ── */
 .login-main {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
-  padding: 64px 80px;
+  /* 상단 고정: 탭 전환으로 콘텐츠 양이 달라져도 시작 위치가 흔들리지 않도록
+     세로 중앙 정렬 대신 위에서부터 배치한다 */
+  padding: 88px 80px 64px;
   background: var(--color-bg-primary);
+  overflow-y: auto;
 }
 .login-content {
   width: 100%;

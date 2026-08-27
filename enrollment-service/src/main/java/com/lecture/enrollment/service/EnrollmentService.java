@@ -44,8 +44,14 @@ public class EnrollmentService {
         }
 
         Enrollment enrollment = enrollmentWriteService.createPendingEnrollment(userId, courseId);
+        // paymentServiceClient.requestPayment(userId, courseId, BigDecimal.valueOf(99000));
 
-        paymentServiceClient.requestPayment(userId, courseId, BigDecimal.valueOf(99000));
+        BigDecimal programPrice = courseServiceClient.getCoursePrice(courseId);
+
+        paymentServiceClient.requestPayment(
+                userId,
+                courseId,
+                programPrice);
 
         log.info("[EnrollmentService] 수강신청 완료 (결제 대기) - enrollmentId: {}", enrollment.getId());
         return EnrollmentDto.EnrollmentResponse.from(enrollment);
@@ -69,8 +75,7 @@ public class EnrollmentService {
                         .enrollmentId(enrollment.getId())
                         .userId(userId)
                         .courseId(courseId)
-                        .build()
-        );
+                        .build());
 
         log.info("[EnrollmentService] 수강 활성화 완료 - enrollmentId: {}", enrollment.getId());
     }
@@ -97,15 +102,11 @@ public class EnrollmentService {
                                     firstNonNull(
                                             (String) courseInfo.get("instructorName"),
                                             (String) courseInfo.get("teacherName"),
-                                            (String) courseInfo.get("instructor_name")
-                                    )
-                            )
+                                            (String) courseInfo.get("instructor_name")))
                             .enrollmentCount(toInteger(
                                     firstNonNullObject(
                                             courseInfo.get("enrollmentCount"),
-                                            courseInfo.get("enrollment_count")
-                                    )
-                            ))
+                                            courseInfo.get("enrollment_count"))))
                             .build();
 
                     return EnrollmentDto.EnrollmentResponse.from(enrollment, courseSummary);
@@ -130,7 +131,8 @@ public class EnrollmentService {
     }
 
     private String normalizeCategory(String category) {
-        if (category == null) return null;
+        if (category == null)
+            return null;
 
         return switch (category) {
             case "BACKEND" -> "백엔드";
@@ -143,14 +145,18 @@ public class EnrollmentService {
     }
 
     private Long toLong(Object value) {
-        if (value == null) return null;
-        if (value instanceof Number number) return number.longValue();
+        if (value == null)
+            return null;
+        if (value instanceof Number number)
+            return number.longValue();
         return Long.parseLong(value.toString());
     }
 
     private Integer toInteger(Object value) {
-        if (value == null) return null;
-        if (value instanceof Number number) return number.intValue();
+        if (value == null)
+            return null;
+        if (value instanceof Number number)
+            return number.intValue();
         return Integer.parseInt(value.toString());
     }
 

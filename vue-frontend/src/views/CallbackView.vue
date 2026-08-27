@@ -54,12 +54,26 @@ onMounted(async () => {
     return
   }
 
-  // 토큰 발급 + /me 성공.
-  redirectWith('로그인 완료! 이동 중입니다...', '/courses', 800)
+  // 토큰 발급 + /me 성공. 로그인 전 보던 프로그램으로 복귀(LoginView 가 세션에 보관).
+  redirectWith('로그인 완료! 이동 중입니다...', consumePostLoginRedirect(), 800)
 })
+
+// same-origin 경로만 허용(오픈 리다이렉트 방지). LoginView 와 동일 키.
+function consumePostLoginRedirect() {
+  const stored = sessionStorage.getItem('post_login_redirect')
+  sessionStorage.removeItem('post_login_redirect')
+  return typeof stored === 'string' &&
+    stored.startsWith('/') &&
+    !stored.startsWith('//') &&
+    !stored.startsWith('/login') &&
+    !stored.startsWith('/callback')
+    ? stored
+    : '/courses'
+}
 </script>
 
 <style scoped>
+/* .spinner 는 global.css */
 .callback-page {
   min-height: 100vh;
   display: flex;
@@ -76,20 +90,5 @@ onMounted(async () => {
   gap: 16px;
   color: var(--color-text-secondary);
   font-size: 15px;
-}
-
-.spinner {
-  width: 40px;
-  height: 40px;
-  border: 3px solid var(--color-border);
-  border-top-color: var(--color-primary);
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
 }
 </style>
